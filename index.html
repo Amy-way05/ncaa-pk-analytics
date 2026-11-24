@@ -1,0 +1,1196 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>NCAA D1 PK Analytics</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --bg:#0a0f1e;--surface:#0f1629;--sr:#151d33;--border:#1e2a45;
+  --text:#e8edf5;--ts:#8a97b0;--tm:#4d5b73;
+  --accent:#3b8beb;--accentSoft:rgba(59,139,235,.10);--accentMed:rgba(59,139,235,.22);
+  --hot:#e8594f;--warm:#e09838;--cool:#2fbf8b;--ice:#22a0c4;
+  --bl:#ffffff;
+  --shadow:0 2px 16px rgba(0,0,0,.5);
+  --fd:'Bebas Neue',Impact,sans-serif;
+  --fs:'Inter',system-ui,sans-serif;
+  --fm:'JetBrains Mono',monospace;
+  color-scheme:dark;
+}
+@media(prefers-color-scheme:light){:root:not([data-theme="dark"]){
+  --bg:#f2f5fa;--surface:#fff;--sr:#ecf1f9;--border:#d3dce9;
+  --text:#0e1629;--ts:#475569;--tm:#94a3b8;
+  --accent:#2266c7;--accentSoft:rgba(34,102,199,.06);--accentMed:rgba(34,102,199,.14);
+  --hot:#c42b20;--warm:#b07318;--cool:#0d8a5e;--ice:#0e7e9e;
+  --bl:#0e1629;
+  --shadow:0 1px 6px rgba(0,0,0,.07);color-scheme:light;
+}}
+:root[data-theme="dark"]{
+  --bg:#0a0f1e;--surface:#0f1629;--sr:#151d33;--border:#1e2a45;
+  --text:#e8edf5;--ts:#8a97b0;--tm:#4d5b73;
+  --accent:#3b8beb;--accentSoft:rgba(59,139,235,.10);--accentMed:rgba(59,139,235,.22);
+  --hot:#e8594f;--warm:#e09838;--cool:#2fbf8b;--ice:#22a0c4;
+  --bl:#ffffff;
+  --shadow:0 2px 16px rgba(0,0,0,.5);color-scheme:dark;
+}
+*{box-sizing:border-box;margin:0}
+body{background:var(--bg);color:var(--text);font-family:var(--fs);line-height:1.6;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));}
+.pg{max-width:1040px;margin:0 auto;padding:40px 0 64px;}
+
+.hero{text-align:center;margin-bottom:44px;position:relative;}
+.hero::before{content:'';position:absolute;top:-40px;left:50%;transform:translateX(-50%);width:280px;height:3px;border-radius:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent);opacity:.6;}
+.badge{display:inline-flex;align-items:center;gap:6px;background:var(--accentSoft);border:1px solid var(--accentMed);border-radius:20px;padding:5px 16px;font-size:10px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.1em;margin-bottom:18px;}
+.badge svg{width:13px;height:13px;fill:currentColor;}
+.hero h1{font-family:var(--fd);font-size:clamp(44px,7.5vw,76px);letter-spacing:.04em;line-height:.92;text-transform:uppercase;background:linear-gradient(180deg,var(--text) 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:14px;}
+.hero-sub{color:var(--ts);font-size:14px;max-width:56ch;margin:0 auto;line-height:1.7;}
+
+.sts{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--border);border-radius:12px;overflow:hidden;margin-bottom:36px;box-shadow:var(--shadow);}
+@media(max-width:600px){.sts{grid-template-columns:repeat(2,1fr);}.sts>:last-child{grid-column:span 2;}}
+.st{background:var(--surface);padding:22px 16px;text-align:center;}
+.st-n{font-family:var(--fd);font-size:clamp(26px,3.5vw,38px);letter-spacing:.02em;line-height:1;color:var(--text);}
+.st-l{font-size:10px;color:var(--tm);text-transform:uppercase;letter-spacing:.08em;margin-top:5px;font-weight:600;}
+
+.legend{display:flex;gap:18px;justify-content:center;flex-wrap:wrap;margin-bottom:20px;padding:10px 16px;background:var(--sr);border-radius:10px;border:1px solid var(--border);}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--ts);font-weight:600;}
+.legend-dot{width:10px;height:10px;border-radius:3px;}
+
+.tabs{display:flex;gap:2px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:3px;margin-bottom:28px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+.tabs::-webkit-scrollbar{display:none;}
+.tab{flex:0 0 auto;padding:10px 14px;border:none;border-radius:8px;font-family:var(--fs);font-size:12px;font-weight:700;cursor:pointer;color:var(--tm);background:transparent;white-space:nowrap;transition:all .2s;letter-spacing:.01em;}
+.tab:hover{color:var(--ts);}
+.tab.on{background:var(--accent);color:#fff;}
+.pn{display:none;animation:fi .3s ease;}
+.pn.on{display:block;}
+@keyframes fi{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+.cd{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:28px;margin-bottom:20px;box-shadow:var(--shadow);position:relative;overflow:hidden;}
+.cd::before{content:'';position:absolute;top:0;left:0;width:60px;height:3px;border-radius:0 0 3px 0;background:var(--accent);opacity:.5;}
+.cd h2{font-family:var(--fd);font-size:22px;letter-spacing:.04em;text-transform:uppercase;margin-bottom:6px;color:var(--text);}
+.cd-d{font-size:12px;color:var(--tm);margin-bottom:20px;max-width:64ch;line-height:1.7;}
+
+.bc{display:flex;flex-direction:column;gap:5px;}
+.br{display:grid;grid-template-columns:150px 1fr 52px;align-items:center;gap:10px;min-height:28px;}
+@media(max-width:600px){.br{grid-template-columns:100px 1fr 44px;}}
+.br-l{font-size:11px;color:var(--ts);text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500;}
+.br-t{position:relative;height:18px;background:var(--sr);border-radius:8px;overflow:visible;}
+.br-f{height:100%;border-radius:8px;transition:width .7s cubic-bezier(.22,1,.36,1);}
+.br-v{font-size:11px;font-family:var(--fm);color:var(--ts);text-align:right;white-space:nowrap;font-weight:500;}
+.bl{position:absolute;top:-8px;bottom:-8px;width:0;z-index:2;border-left:2px dashed var(--bl);opacity:.5;}
+.bl::after{content:none;}
+.br:hover .br-f{filter:brightness(1.12);}
+.br-small .br-f{opacity:.35!important;}
+.br-small .br-l,.br-small .br-v{opacity:.5;}
+.br-badge{position:absolute;top:50%;right:4px;transform:translateY(-50%);font-size:7px;color:var(--tm);background:var(--bg);padding:1px 5px;border-radius:4px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;z-index:3;}
+
+.vbc{display:flex;align-items:flex-end;gap:10px;height:210px;padding-top:28px;position:relative;}
+@media(max-width:600px){.vbc{gap:6px;height:170px;}}
+.vb{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;height:100%;justify-content:flex-end;}
+.vb-f{width:100%;max-width:36px;border-radius:6px 6px 0 0;transition:height .7s cubic-bezier(.22,1,.36,1);cursor:default;}
+.vb-f:hover{filter:brightness(1.12);}
+.vb-v{font-size:10px;font-family:var(--fm);color:var(--ts);white-space:nowrap;font-weight:500;}
+.vb-l{font-size:9px;color:var(--tm);text-align:center;line-height:1.3;max-width:56px;font-weight:500;}
+.vbc-bl{position:absolute;left:0;right:0;height:0;border-top:2px dashed var(--bl);z-index:2;opacity:.4;}
+.vbc-bl::after{content:none;}
+
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+@media(max-width:700px){.g2{grid-template-columns:1fr;}}
+
+.hm{display:grid;grid-template-columns:56px repeat(5,1fr);gap:2px;margin-top:12px;}
+@media(max-width:500px){.hm{grid-template-columns:40px repeat(5,1fr);}}
+.hm-h{font-size:9px;font-weight:700;color:var(--tm);text-transform:uppercase;text-align:center;padding:6px 2px;letter-spacing:.04em;}
+.hm-r{font-size:11px;font-weight:700;color:var(--ts);display:flex;align-items:center;justify-content:flex-end;padding-right:8px;}
+.hm-c{border-radius:8px;text-align:center;padding:12px 4px;cursor:default;font-weight:700;font-size:13px;font-variant-numeric:tabular-nums;transition:transform .15s;}
+.hm-c:hover{transform:scale(1.06);z-index:2;}
+.hm-c small{display:block;font-size:8px;font-weight:500;opacity:.6;margin-top:3px;}
+
+.tbl{width:100%;border-collapse:collapse;font-size:12px;font-variant-numeric:tabular-nums;}
+.tbl th{text-align:left;font-size:9px;font-weight:700;color:var(--tm);text-transform:uppercase;letter-spacing:.07em;padding:10px 8px;border-bottom:2px solid var(--border);cursor:pointer;user-select:none;white-space:nowrap;}
+.tbl th:hover{color:var(--accent);}
+.tbl th.r{text-align:right;}
+.tbl th .sort-arrow{font-size:8px;margin-left:3px;opacity:.4;}
+.tbl th.sorted .sort-arrow{opacity:1;color:var(--accent);}
+.tbl td{padding:11px 8px;border-bottom:1px solid var(--border);color:var(--ts);}
+.tbl td.r{text-align:right;font-family:var(--fm);font-size:11px;}
+.tbl td.nm{color:var(--text);font-weight:600;}
+.tbl tr:hover td{background:var(--sr);}
+.bf{display:flex;align-items:center;gap:8px;}
+.bf-f{height:5px;border-radius:3px;background:var(--accent);min-width:2px;opacity:.7;}
+.bf-l{font-family:var(--fm);font-size:10px;color:var(--tm);white-space:nowrap;font-weight:500;}
+
+.search{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;}
+.search input{flex:1;min-width:160px;padding:10px 16px;background:var(--sr);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:var(--fs);font-size:12px;outline:none;transition:border .2s;}
+.search input:focus{border-color:var(--accent);}
+.search input::placeholder{color:var(--tm);}
+.search select{padding:10px 12px;background:var(--sr);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:var(--fs);font-size:12px;outline:none;cursor:pointer;}
+.export-btn{padding:10px 16px;background:var(--accentSoft);border:1px solid var(--accentMed);border-radius:10px;color:var(--accent);font-family:var(--fs);font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;transition:all .2s;}
+.export-btn:hover{background:var(--accentMed);}
+
+.upload-zone{border:2px dashed var(--border);border-radius:14px;padding:44px;text-align:center;cursor:pointer;transition:all .2s;}
+.upload-zone:hover{border-color:var(--accent);background:var(--accentSoft);}
+.upload-zone input{display:none;}
+
+.chat-box{background:var(--sr);border-radius:12px;padding:18px;max-height:400px;overflow-y:auto;margin-bottom:14px;}
+.chat-msg{margin:10px 0;padding:12px 16px;border-radius:12px;font-size:12px;line-height:1.7;max-width:82%;word-wrap:break-word;white-space:pre-wrap;}
+.chat-msg.user{background:var(--accent);color:#fff;margin-left:auto;border-bottom-right-radius:3px;}
+.chat-msg.ai{background:var(--surface);color:var(--ts);border:1px solid var(--border);border-bottom-left-radius:3px;}
+.chat-input{display:flex;gap:8px;}
+.chat-input input{flex:1;padding:12px 16px;background:var(--sr);border:1px solid var(--border);border-radius:12px;color:var(--text);font-family:var(--fs);font-size:12px;outline:none;}
+.chat-input input:focus{border-color:var(--accent);}
+.chat-input button{padding:12px 20px;background:var(--accent);color:#fff;border:none;border-radius:12px;font-weight:700;cursor:pointer;font-family:var(--fs);font-size:12px;transition:all .2s;}
+.chat-input button:hover{filter:brightness(1.1);}
+.chat-quick{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;}
+.chat-quick button{padding:6px 14px;background:var(--accentSoft);border:1px solid var(--accentMed);border-radius:20px;color:var(--accent);font-size:10px;font-weight:700;cursor:pointer;font-family:var(--fs);transition:all .2s;letter-spacing:.02em;}
+.chat-quick button:hover{background:var(--accentMed);}
+
+.ai-setup{background:var(--sr);border:1px solid var(--border);border-radius:12px;padding:20px;margin-top:16px;}
+.ai-setup label{font-size:11px;font-weight:700;color:var(--tm);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px;}
+.ai-setup input{width:100%;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--fm);font-size:11px;outline:none;margin-bottom:10px;}
+.ai-setup input:focus{border-color:var(--accent);}
+.ai-setup button{padding:8px 18px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:11px;}
+.ai-setup .note{font-size:10px;color:var(--tm);margin-top:8px;line-height:1.6;}
+
+.mg{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;}
+.mc{padding:18px;background:var(--sr);border-radius:12px;border:1px solid var(--border);}
+.mc h4{font-size:12px;font-weight:700;margin-bottom:8px;color:var(--text);}
+.mc p{font-size:11px;color:var(--tm);line-height:1.7;}
+
+.ins{background:var(--sr);border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:14px;}
+.ins h4{font-size:12px;font-weight:700;color:var(--accent);margin-bottom:6px;}
+.ins p{font-size:11px;color:var(--ts);line-height:1.7;}
+
+.ft{margin-top:40px;text-align:center;font-size:10px;color:var(--tm);padding-top:18px;border-top:1px solid var(--border);line-height:1.8;}
+
+#tip{position:fixed;z-index:100;pointer-events:none;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 16px;box-shadow:var(--shadow);font-size:11px;color:var(--ts);max-width:260px;opacity:0;transition:opacity .15s;line-height:1.6;}
+#tip.on{opacity:1;}
+#tip b{color:var(--text);display:block;margin-bottom:3px;font-size:12px;}
+
+.scout-input{display:flex;gap:8px;margin-bottom:20px;}
+.scout-input input{flex:1;padding:12px 16px;background:var(--sr);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:var(--fs);font-size:13px;outline:none;}
+.scout-input input:focus{border-color:var(--accent);}
+.scout-input button{padding:12px 24px;background:var(--accent);color:#fff;border:none;border-radius:10px;font-weight:700;cursor:pointer;font-size:13px;}
+
+.risk-slider{width:100%;-webkit-appearance:none;height:8px;border-radius:4px;background:linear-gradient(90deg,var(--cool),var(--warm),var(--hot));outline:none;cursor:pointer;margin:20px 0 8px;}
+.risk-slider::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:var(--text);border:3px solid var(--accent);cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.4);}
+.risk-out{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:20px;}
+.risk-box{background:var(--sr);border:1px solid var(--border);border-radius:12px;padding:20px;text-align:center;}
+.risk-num{font-family:var(--fd);font-size:32px;color:var(--text);line-height:1;}
+.risk-label{font-size:10px;color:var(--tm);text-transform:uppercase;letter-spacing:.06em;margin-top:6px;font-weight:600;}
+@media(max-width:500px){.risk-out{grid-template-columns:1fr;}}
+
+.gl-grid{display:grid;grid-template-columns:1fr;gap:0;}
+.gl-row{display:grid;grid-template-columns:180px 1fr;gap:16px;padding:14px 0;border-bottom:1px solid var(--border);align-items:start;}
+@media(max-width:600px){.gl-row{grid-template-columns:1fr;gap:4px;}}
+.gl-term{font-size:12px;font-weight:700;color:var(--accent);font-family:var(--fm);}
+.gl-def{font-size:12px;color:var(--ts);line-height:1.7;}
+.gl-def b{color:var(--text);font-weight:600;}
+
+.sim-btn{padding:7px 14px;border:1px solid var(--border);border-radius:20px;background:var(--sr);color:var(--ts);font-family:var(--fs);font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap;}
+.sim-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accentSoft);}
+.sim-btn.sim-on{background:var(--accent);color:#fff;border-color:var(--accent);}
+</style>
+
+<div class="pg">
+  <div class="hero">
+    <div class="badge">
+      <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/><circle cx="12" cy="12" r="3"/></svg>
+      NCAA Division I Men's Ice Hockey
+    </div>
+    <h1>Penalty-Kill<br>Risk Intelligence</h1>
+    <p class="hero-sub">When your team takes a penalty, how likely is it to become a goal against? Built for coaches and players from 82,397 penalties across 216 programs and 8 seasons of public box scores.</p>
+  </div>
+
+  <div class="sts" id="stats"></div>
+  <div class="legend" id="color-legend"></div>
+  <div class="tabs" id="tabs"></div>
+  <div id="panes"></div>
+
+  <div class="ft">
+    Every number traces to a specific publicly posted NCAA D1 box score.<br>
+    Data: 8 seasons (2015-16 through 2025-26; 5 full, 3 partial). Research: SportRxiv DOI 10.51224/SRXIV.972
+  </div>
+</div>
+<div id="tip"></div>
+
+<script>
+(function(){
+"use strict";
+
+var D={"total_games":9730,"total_penalties":82397,"total_teams":216,"valid_for_risk":48744,"baseline":21.1,"ppg_avg":4.2,"off":[["Embellishment",5,11,45.5],["Slew Footing",21,51,41.2],["Game Misconduct",466,1225,38.0],["Diving",9,25,36.0],["Contact To The Head",163,470,34.7],["Face Masking",48,140,34.3],["Clipping",5,15,33.3],["Direct Contact To The Head",60,184,32.6],["Kneeing",124,447,27.7],["Hitting From Behind",216,853,25.3],["Spearing",12,48,25.0],["Charging The Goaltender",9,36,25.0],["Butt Ending",4,17,23.5],["Bench Minor",20,88,22.7],["Misconduct",43,192,22.4],["Slashing The Goaltender",4,18,22.2],["Cross Checking",883,4076,21.7],["Boarding",565,2626,21.5],["Faceoff Violation",51,238,21.4],["Hooking",1250,6029,20.7],["Tripping",1759,8559,20.6],["Elbowing",137,671,20.4],["Roughing",503,2495,20.2],["Holding",942,4656,20.2],["Delaying The Game",51,255,20.0],["Too Many Players",243,1239,19.6],["Interference",1132,5805,19.5],["Slashing",894,4604,19.4],["High Sticking",327,1722,19.0],["Unsportsmanlike",60,324,18.5],["Holding The Stick",43,236,18.2],["Body Check",2,11,18.2],["Indirect Contact To The Head",44,246,17.9],["Charging",50,284,17.6],["Hit After Whistle",17,103,16.5],["Handling The Puck",14,85,16.5],["Goalie Interference",69,443,15.6],["Disqualification",3,22,13.6],["Roughing After Whistle",2,37,5.4],["Broken Stick",1,19,5.3],["Shot After Whistle",0,10,0.0]],"dur":[["10 min (misconduct)",1471,526,35.8],["5 min (major)",1792,663,37.0],["2 min (minor)",45481,9094,20.0]],"pt":[["1st early",6862,1386,20.2],["1st late",8146,1686,20.7],["2nd early",9161,2019,22.0],["2nd late",9227,2001,21.7],["3rd early",8067,1595,19.8],["3rd late",7028,1527,21.7]],"sd":[["Down 3+",3738,896,24.0],["Down 2",3843,968,25.2],["Down 1",7805,1737,22.3],["Tied",15143,3132,20.7],["Up 1",9079,1861,20.5],["Up 2",4739,874,18.4],["Up 3+",4397,815,18.5]],"hm":[["1st","Down 2+",26.4,659],["1st","Down 1",21.0,2471],["1st","Tied",20.0,8121],["1st","Up 1",20.4,2857],["1st","Up 2+",19.2,900],["2nd","Down 2+",25.9,2906],["2nd","Down 1",21.5,3362],["2nd","Tied",21.7,4516],["2nd","Up 1",21.9,3917],["2nd","Up 2+",19.1,3687],["3rd","Down 2+",23.3,4016],["3rd","Down 1",25.2,1953],["3rd","Tied",20.1,2281],["3rd","Up 1",18.4,2296],["3rd","Up 2+",17.9,4549]],"tm_all":[["Simon Fraser",93,16,5.8,13.7],["U.S. National Under-18 Team",111,19,5.8,26.1],["Holy Cross",1115,202,5.5,18.8],["Alaska Fairbanks",632,119,5.3,22.3],["RIT",1896,372,5.1,16.3],["Lindenwood",457,89,5.1,26.1],["Stonehill",1059,210,5.0,24.2],["LIU",1402,282,5.0,24.5],["Michigan",1636,327,5.0,23.8],["Miami (OH)",1553,325,4.8,23.5],["Alaska Anchorage",1095,233,4.7,25.0],["Boston University",1830,387,4.7,18.6],["Bowling Green",1319,282,4.7,19.6],["Ferris State",673,142,4.7,25.2],["Canisius",1653,359,4.6,22.1],["Colgate",1345,293,4.6,18.3],["Notre Dame",496,108,4.6,26.7],["Arizona State",696,152,4.6,19.4],["Northern Michigan",1379,297,4.6,26.5],["Lake Superior State",1322,296,4.5,22.0],["North Dakota",1785,399,4.5,18.1],["Omaha",1620,358,4.5,22.4],["Air Force",1603,363,4.4,19.3],["Bentley",1548,352,4.4,19.2],["Robert Morris",1227,280,4.4,24.3],["Princeton",1314,296,4.4,24.8],["St. Thomas",543,124,4.4,24.7],["Yale",1237,280,4.4,24.9],["Minnesota Duluth",1518,348,4.4,19.5],["Denver",1679,395,4.3,20.5],["Mercyhurst",823,192,4.3,23.5],["Niagara",1525,357,4.3,22.9],["Colorado College",2532,587,4.3,22.4],["Minnesota State",404,93,4.3,13.4],["Boston College",1504,354,4.2,18.9],["Ohio State",1015,243,4.2,22.7],["Penn State",586,139,4.2,19.2],["Providence",1482,350,4.2,21.0],["Michigan State",2077,498,4.2,17.9],["Brown",1210,291,4.2,22.5],["Clarkson",1368,324,4.2,18.9],["St. Lawrence",1435,339,4.2,19.6],["AIC",1276,310,4.1,20.0],["Army West Point",1450,356,4.1,18.4],["Maine",1420,348,4.1,24.3],["Merrimack",2010,486,4.1,24.6],["Cornell",1292,316,4.1,18.6],["Union",1318,324,4.1,19.1],["ALA",53,13,4.1,16.7],["Wisconsin",1085,265,4.1,19.8],["UMass Lowell",1405,348,4.0,19.7],["RPI",1428,358,4.0,26.4],["UConn",1206,301,4.0,18.9],["St. Cloud State",1371,344,4.0,25.2],["Sacred Heart",1555,398,3.9,19.5],["Vermont",1296,333,3.9,24.6],["Northeastern",1422,363,3.9,15.5],["New Hampshire",1303,338,3.9,18.1],["Western Michigan",1414,365,3.9,18.4],["Dartmouth",1093,289,3.8,16.5],["Bemidji State",484,129,3.8,27.1],["Michigan Tech",1096,293,3.7,18.4],["Quinnipiac",1304,362,3.6,13.9],["Massachusetts",1229,350,3.5,19.7],["Harvard",504,150,3.4,19.5],["Augustana",174,52,3.3,12.2],["Minnesota",957,300,3.2,25.0]],"sn":[["2015-16",242,37,197,41,20.8],["2019-20",925,94,682,140,20.5],["2020-21",403,47,301,60,19.9],["2021-22",15066,1707,8920,1841,20.6],["2022-23",16951,1910,10219,2154,21.1],["2023-24",17254,2022,10227,2206,21.6],["2024-25",15446,1991,8991,1939,21.6],["2025-26",16110,1922,9207,1902,20.7]]};
+
+var CASCADE=[["1st penalty",11932,2468,20.7],["2nd penalty",11265,2303,20.4],["3rd penalty",9086,1918,21.1],["4th penalty",6660,1414,21.2],["5th+ penalty",9801,2180,22.2]];
+var SEV_PER=[["Minor","1st",14282,2791,19.5],["Minor","2nd",17209,3590,20.9],["Minor","3rd",13741,2645,19.2],["Major","1st",426,171,40.1],["Major","2nd",674,250,37.1],["Major","3rd",689,241,35.0]];
+var CONF_DATA=[["Atlantic Hockey",12,16730,3751,4.5,20.7],["Hockey East",11,16107,3958,4.1,20.4],["ECAC",12,14848,3622,4.1,20.2],["CCHA",8,7220,1656,4.4,22.1],["NCHC",8,13472,3121,4.3,21.2],["Big Ten",7,7852,1880,4.2,22.2],["Independent",9,4713,975,4.8,20.7]];
+var SIM={"1st|Any|Any|1st":[8896,1781,20.0],"1st|Any|Any|2nd":[4131,813,19.7],"1st|Any|Any|3rd":[1296,270,20.8],"1st|Any|Any|4th":[320,79,24.7],"1st|Any|Any|5th+":[65,19,29.2],"1st|Any|Any|Any":[14708,2962,20.1],"1st|Any|Major|1st":[220,74,33.6],"1st|Any|Major|2nd":[118,55,46.6],"1st|Any|Major|3rd":[53,21,39.6],"1st|Any|Major|4th":[30,19,63.3],"1st|Any|Major|5th+":[5,2,40.0],"1st|Any|Major|Any":[426,171,40.1],"1st|Any|Minor|1st":[8676,1707,19.7],"1st|Any|Minor|2nd":[4013,758,18.9],"1st|Any|Minor|3rd":[1243,249,20.0],"1st|Any|Minor|4th":[290,60,20.7],"1st|Any|Minor|5th+":[60,17,28.3],"1st|Any|Minor|Any":[14282,2791,19.5],"1st|Down 1|Any|1st":[1270,255,20.1],"1st|Down 1|Any|2nd":[809,166,20.5],"1st|Down 1|Any|3rd":[264,56,21.2],"1st|Down 1|Any|4th":[71,24,33.8],"1st|Down 1|Any|5th+":[16,7,43.8],"1st|Down 1|Any|Any":[2430,508,20.9],"1st|Down 1|Major|1st":[28,6,21.4],"1st|Down 1|Major|2nd":[24,12,50.0],"1st|Down 1|Major|3rd":[9,3,33.3],"1st|Down 1|Major|4th":[6,6,100.0],"1st|Down 1|Major|Any":[67,27,40.3],"1st|Down 1|Minor|1st":[1242,249,20.0],"1st|Down 1|Minor|2nd":[785,154,19.6],"1st|Down 1|Minor|3rd":[255,53,20.8],"1st|Down 1|Minor|4th":[65,18,27.7],"1st|Down 1|Minor|5th+":[16,7,43.8],"1st|Down 1|Minor|Any":[2363,481,20.4],"1st|Down 2+|Any|1st":[223,51,22.9],"1st|Down 2+|Any|2nd":[248,57,23.0],"1st|Down 2+|Any|3rd":[120,31,25.8],"1st|Down 2+|Any|4th":[34,14,41.2],"1st|Down 2+|Any|5th+":[7,5,71.4],"1st|Down 2+|Any|Any":[632,158,25.0],"1st|Down 2+|Major|1st":[4,2,50.0],"1st|Down 2+|Major|2nd":[10,7,70.0],"1st|Down 2+|Major|3rd":[4,0,0.0],"1st|Down 2+|Major|4th":[5,5,100.0],"1st|Down 2+|Major|5th+":[1,0,0.0],"1st|Down 2+|Major|Any":[24,14,58.3],"1st|Down 2+|Minor|1st":[219,49,22.4],"1st|Down 2+|Minor|2nd":[238,50,21.0],"1st|Down 2+|Minor|3rd":[116,31,26.7],"1st|Down 2+|Minor|4th":[29,9,31.0],"1st|Down 2+|Minor|5th+":[6,5,83.3],"1st|Down 2+|Minor|Any":[608,144,23.7],"1st|Tied|Any|1st":[5274,1023,19.4],"1st|Tied|Any|2nd":[1987,406,20.4],"1st|Tied|Any|3rd":[557,117,21.0],"1st|Tied|Any|4th":[113,19,16.8],"1st|Tied|Any|5th+":[22,4,18.2],"1st|Tied|Any|Any":[7953,1569,19.7],"1st|Tied|Major|1st":[134,45,33.6],"1st|Tied|Major|2nd":[59,28,47.5],"1st|Tied|Major|3rd":[25,10,40.0],"1st|Tied|Major|4th":[12,4,33.3],"1st|Tied|Major|Any":[230,87,37.8],"1st|Tied|Minor|1st":[5140,978,19.0],"1st|Tied|Minor|2nd":[1928,378,19.6],"1st|Tied|Minor|3rd":[532,107,20.1],"1st|Tied|Minor|4th":[101,15,14.9],"1st|Tied|Minor|5th+":[22,4,18.2],"1st|Tied|Minor|Any":[7723,1482,19.2],"1st|Up 1|Any|1st":[1681,360,21.4],"1st|Up 1|Any|2nd":[806,141,17.5],"1st|Up 1|Any|3rd":[237,42,17.7],"1st|Up 1|Any|4th":[69,13,18.8],"1st|Up 1|Any|5th+":[10,3,30.0],"1st|Up 1|Any|Any":[2803,559,19.9],"1st|Up 1|Major|1st":[49,20,40.8],"1st|Up 1|Major|2nd":[17,6,35.3],"1st|Up 1|Major|3rd":[10,5,50.0],"1st|Up 1|Major|4th":[7,4,57.1],"1st|Up 1|Major|5th+":[2,2,100.0],"1st|Up 1|Major|Any":[85,37,43.5],"1st|Up 1|Minor|1st":[1632,340,20.8],"1st|Up 1|Minor|2nd":[789,135,17.1],"1st|Up 1|Minor|3rd":[227,37,16.3],"1st|Up 1|Minor|4th":[62,9,14.5],"1st|Up 1|Minor|5th+":[8,1,12.5],"1st|Up 1|Minor|Any":[2718,522,19.2],"1st|Up 2+|Any|1st":[448,92,20.5],"1st|Up 2+|Any|2nd":[281,43,15.3],"1st|Up 2+|Any|3rd":[118,24,20.3],"1st|Up 2+|Any|4th":[33,9,27.3],"1st|Up 2+|Any|5th+":[10,0,0.0],"1st|Up 2+|Any|Any":[890,168,18.9],"1st|Up 2+|Major|1st":[5,1,20.0],"1st|Up 2+|Major|2nd":[8,2,25.0],"1st|Up 2+|Major|3rd":[5,3,60.0],"1st|Up 2+|Major|5th+":[2,0,0.0],"1st|Up 2+|Major|Any":[20,6,30.0],"1st|Up 2+|Minor|1st":[443,91,20.5],"1st|Up 2+|Minor|2nd":[273,41,15.0],"1st|Up 2+|Minor|3rd":[113,21,18.6],"1st|Up 2+|Minor|4th":[33,9,27.3],"1st|Up 2+|Minor|5th+":[8,0,0.0],"1st|Up 2+|Minor|Any":[870,162,18.6],"2nd|Any|Any|1st":[2647,591,22.3],"2nd|Any|Any|2nd":[5305,1081,20.4],"2nd|Any|Any|3rd":[4749,1018,21.4],"2nd|Any|Any|4th":[2916,659,22.6],"2nd|Any|Any|5th+":[2266,491,21.7],"2nd|Any|Any|Any":[17883,3840,21.5],"2nd|Any|Major|1st":[55,18,32.7],"2nd|Any|Major|2nd":[181,73,40.3],"2nd|Any|Major|3rd":[151,47,31.1],"2nd|Any|Major|4th":[139,49,35.3],"2nd|Any|Major|5th+":[148,63,42.6],"2nd|Any|Major|Any":[674,250,37.1],"2nd|Any|Minor|1st":[2592,573,22.1],"2nd|Any|Minor|2nd":[5124,1008,19.7],"2nd|Any|Minor|3rd":[4598,971,21.1],"2nd|Any|Minor|4th":[2777,610,22.0],"2nd|Any|Minor|5th+":[2118,428,20.2],"2nd|Any|Minor|Any":[17209,3590,20.9],"2nd|Down 1|Any|1st":[467,108,23.1],"2nd|Down 1|Any|2nd":[971,206,21.2],"2nd|Down 1|Any|3rd":[872,184,21.1],"2nd|Down 1|Any|4th":[574,122,21.3],"2nd|Down 1|Any|5th+":[375,83,22.1],"2nd|Down 1|Any|Any":[3259,703,21.6],"2nd|Down 1|Major|1st":[9,5,55.6],"2nd|Down 1|Major|2nd":[43,11,25.6],"2nd|Down 1|Major|3rd":[32,5,15.6],"2nd|Down 1|Major|4th":[23,9,39.1],"2nd|Down 1|Major|5th+":[26,7,26.9],"2nd|Down 1|Major|Any":[133,37,27.8],"2nd|Down 1|Minor|1st":[458,103,22.5],"2nd|Down 1|Minor|2nd":[928,195,21.0],"2nd|Down 1|Minor|3rd":[840,179,21.3],"2nd|Down 1|Minor|4th":[551,113,20.5],"2nd|Down 1|Minor|5th+":[349,76,21.8],"2nd|Down 1|Minor|Any":[3126,666,21.3],"2nd|Down 2+|Any|1st":[300,74,24.7],"2nd|Down 2+|Any|2nd":[694,201,29.0],"2nd|Down 2+|Any|3rd":[723,171,23.7],"2nd|Down 2+|Any|4th":[550,141,25.6],"2nd|Down 2+|Any|5th+":[549,129,23.5],"2nd|Down 2+|Any|Any":[2816,716,25.4],"2nd|Down 2+|Major|1st":[5,1,20.0],"2nd|Down 2+|Major|2nd":[25,9,36.0],"2nd|Down 2+|Major|3rd":[28,7,25.0],"2nd|Down 2+|Major|4th":[25,8,32.0],"2nd|Down 2+|Major|5th+":[38,21,55.3],"2nd|Down 2+|Major|Any":[121,46,38.0],"2nd|Down 2+|Minor|1st":[295,73,24.7],"2nd|Down 2+|Minor|2nd":[669,192,28.7],"2nd|Down 2+|Minor|3rd":[695,164,23.6],"2nd|Down 2+|Minor|4th":[525,133,25.3],"2nd|Down 2+|Minor|5th+":[511,108,21.1],"2nd|Down 2+|Minor|Any":[2695,670,24.9],"2nd|Tied|Any|1st":[749,163,21.8],"2nd|Tied|Any|2nd":[1361,265,19.5],"2nd|Tied|Any|3rd":[1154,257,22.3],"2nd|Tied|Any|4th":[655,139,21.2],"2nd|Tied|Any|5th+":[467,108,23.1],"2nd|Tied|Any|Any":[4386,932,21.2],"2nd|Tied|Major|1st":[14,3,21.4],"2nd|Tied|Major|2nd":[49,23,46.9],"2nd|Tied|Major|3rd":[41,16,39.0],"2nd|Tied|Major|4th":[28,8,28.6],"2nd|Tied|Major|5th+":[27,13,48.1],"2nd|Tied|Major|Any":[159,63,39.6],"2nd|Tied|Minor|1st":[735,160,21.8],"2nd|Tied|Minor|2nd":[1312,242,18.4],"2nd|Tied|Minor|3rd":[1113,241,21.7],"2nd|Tied|Minor|4th":[627,131,20.9],"2nd|Tied|Minor|5th+":[440,95,21.6],"2nd|Tied|Minor|Any":[4227,869,20.6],"2nd|Up 1|Any|1st":[637,142,22.3],"2nd|Up 1|Any|2nd":[1182,223,18.9],"2nd|Up 1|Any|3rd":[1024,230,22.5],"2nd|Up 1|Any|4th":[588,134,22.8],"2nd|Up 1|Any|5th+":[395,84,21.3],"2nd|Up 1|Any|Any":[3826,813,21.2],"2nd|Up 1|Major|1st":[16,5,31.2],"2nd|Up 1|Major|2nd":[33,18,54.5],"2nd|Up 1|Major|3rd":[31,15,48.4],"2nd|Up 1|Major|4th":[32,14,43.8],"2nd|Up 1|Major|5th+":[16,6,37.5],"2nd|Up 1|Major|Any":[128,58,45.3],"2nd|Up 1|Minor|1st":[621,137,22.1],"2nd|Up 1|Minor|2nd":[1149,205,17.8],"2nd|Up 1|Minor|3rd":[993,215,21.7],"2nd|Up 1|Minor|4th":[556,120,21.6],"2nd|Up 1|Minor|5th+":[379,78,20.6],"2nd|Up 1|Minor|Any":[3698,755,20.4],"2nd|Up 2+|Any|1st":[494,104,21.1],"2nd|Up 2+|Any|2nd":[1097,186,17.0],"2nd|Up 2+|Any|3rd":[976,176,18.0],"2nd|Up 2+|Any|4th":[549,123,22.4],"2nd|Up 2+|Any|5th+":[480,87,18.1],"2nd|Up 2+|Any|Any":[3596,676,18.8],"2nd|Up 2+|Major|1st":[11,4,36.4],"2nd|Up 2+|Major|2nd":[31,12,38.7],"2nd|Up 2+|Major|3rd":[19,4,21.1],"2nd|Up 2+|Major|4th":[31,10,32.3],"2nd|Up 2+|Major|5th+":[41,16,39.0],"2nd|Up 2+|Major|Any":[133,46,34.6],"2nd|Up 2+|Minor|1st":[483,100,20.7],"2nd|Up 2+|Minor|2nd":[1066,174,16.3],"2nd|Up 2+|Minor|3rd":[957,172,18.0],"2nd|Up 2+|Minor|4th":[518,113,21.8],"2nd|Up 2+|Minor|5th+":[439,71,16.2],"2nd|Up 2+|Minor|Any":[3463,630,18.2],"3rd|Any|Any|1st":[369,88,23.8],"3rd|Any|Any|2nd":[1601,336,21.0],"3rd|Any|Any|3rd":[2728,503,18.4],"3rd|Any|Any|4th":[3130,599,19.1],"3rd|Any|Any|5th+":[6602,1360,20.6],"3rd|Any|Any|Any":[14430,2886,20.0],"3rd|Any|Major|1st":[5,0,0.0],"3rd|Any|Major|2nd":[53,25,47.2],"3rd|Any|Major|3rd":[102,32,31.4],"3rd|Any|Major|4th":[139,47,33.8],"3rd|Any|Major|5th+":[390,137,35.1],"3rd|Any|Major|Any":[689,241,35.0],"3rd|Any|Minor|1st":[364,88,24.2],"3rd|Any|Minor|2nd":[1548,311,20.1],"3rd|Any|Minor|3rd":[2626,471,17.9],"3rd|Any|Minor|4th":[2991,552,18.5],"3rd|Any|Minor|5th+":[6212,1223,19.7],"3rd|Any|Minor|Any":[13741,2645,19.2],"3rd|Down 1|Any|1st":[67,22,32.8],"3rd|Down 1|Any|2nd":[261,58,22.2],"3rd|Down 1|Any|3rd":[409,81,19.8],"3rd|Down 1|Any|4th":[389,94,24.2],"3rd|Down 1|Any|5th+":[751,195,26.0],"3rd|Down 1|Any|Any":[1877,450,24.0],"3rd|Down 1|Major|2nd":[5,4,80.0],"3rd|Down 1|Major|3rd":[20,9,45.0],"3rd|Down 1|Major|4th":[20,10,50.0],"3rd|Down 1|Major|5th+":[44,25,56.8],"3rd|Down 1|Major|Any":[89,48,53.9],"3rd|Down 1|Minor|1st":[67,22,32.8],"3rd|Down 1|Minor|2nd":[256,54,21.1],"3rd|Down 1|Minor|3rd":[389,72,18.5],"3rd|Down 1|Minor|4th":[369,84,22.8],"3rd|Down 1|Minor|5th+":[707,170,24.0],"3rd|Down 1|Minor|Any":[1788,402,22.5],"3rd|Down 2+|Any|1st":[53,17,32.1],"3rd|Down 2+|Any|2nd":[308,59,19.2],"3rd|Down 2+|Any|3rd":[568,125,22.0],"3rd|Down 2+|Any|4th":[744,164,22.0],"3rd|Down 2+|Any|5th+":[2078,478,23.0],"3rd|Down 2+|Any|Any":[3751,843,22.5],"3rd|Down 2+|Major|1st":[2,0,0.0],"3rd|Down 2+|Major|2nd":[13,2,15.4],"3rd|Down 2+|Major|3rd":[24,9,37.5],"3rd|Down 2+|Major|4th":[42,11,26.2],"3rd|Down 2+|Major|5th+":[141,56,39.7],"3rd|Down 2+|Major|Any":[222,78,35.1],"3rd|Down 2+|Minor|1st":[51,17,33.3],"3rd|Down 2+|Minor|2nd":[295,57,19.3],"3rd|Down 2+|Minor|3rd":[544,116,21.3],"3rd|Down 2+|Minor|4th":[702,153,21.8],"3rd|Down 2+|Minor|5th+":[1937,422,21.8],"3rd|Down 2+|Minor|Any":[3529,765,21.7],"3rd|Tied|Any|1st":[71,17,23.9],"3rd|Tied|Any|2nd":[314,81,25.8],"3rd|Tied|Any|3rd":[466,74,15.9],"3rd|Tied|Any|4th":[510,95,18.6],"3rd|Tied|Any|5th+":[848,167,19.7],"3rd|Tied|Any|Any":[2209,434,19.6],"3rd|Tied|Major|2nd":[8,7,87.5],"3rd|Tied|Major|3rd":[20,7,35.0],"3rd|Tied|Major|4th":[26,7,26.9],"3rd|Tied|Major|5th+":[37,10,27.0],"3rd|Tied|Major|Any":[91,31,34.1],"3rd|Tied|Minor|1st":[71,17,23.9],"3rd|Tied|Minor|2nd":[306,74,24.2],"3rd|Tied|Minor|3rd":[446,67,15.0],"3rd|Tied|Minor|4th":[484,88,18.2],"3rd|Tied|Minor|5th+":[811,157,19.4],"3rd|Tied|Minor|Any":[2118,403,19.0],"3rd|Up 1|Any|1st":[67,14,20.9],"3rd|Up 1|Any|2nd":[247,42,17.0],"3rd|Up 1|Any|3rd":[478,86,18.0],"3rd|Up 1|Any|4th":[489,78,16.0],"3rd|Up 1|Any|5th+":[928,176,19.0],"3rd|Up 1|Any|Any":[2209,396,17.9],"3rd|Up 1|Major|2nd":[6,1,16.7],"3rd|Up 1|Major|3rd":[12,3,25.0],"3rd|Up 1|Major|4th":[15,9,60.0],"3rd|Up 1|Major|5th+":[73,23,31.5],"3rd|Up 1|Major|Any":[106,36,34.0],"3rd|Up 1|Minor|1st":[67,14,20.9],"3rd|Up 1|Minor|2nd":[241,41,17.0],"3rd|Up 1|Minor|3rd":[466,83,17.8],"3rd|Up 1|Minor|4th":[474,69,14.6],"3rd|Up 1|Minor|5th+":[855,153,17.9],"3rd|Up 1|Minor|Any":[2103,360,17.1],"3rd|Up 2+|Any|1st":[111,18,16.2],"3rd|Up 2+|Any|2nd":[471,96,20.4],"3rd|Up 2+|Any|3rd":[807,137,17.0],"3rd|Up 2+|Any|4th":[998,168,16.8],"3rd|Up 2+|Any|5th+":[1997,344,17.2],"3rd|Up 2+|Any|Any":[4384,763,17.4],"3rd|Up 2+|Major|1st":[3,0,0.0],"3rd|Up 2+|Major|2nd":[21,11,52.4],"3rd|Up 2+|Major|3rd":[26,4,15.4],"3rd|Up 2+|Major|4th":[36,10,27.8],"3rd|Up 2+|Major|5th+":[95,23,24.2],"3rd|Up 2+|Major|Any":[181,48,26.5],"3rd|Up 2+|Minor|1st":[108,18,16.7],"3rd|Up 2+|Minor|2nd":[450,85,18.9],"3rd|Up 2+|Minor|3rd":[781,133,17.0],"3rd|Up 2+|Minor|4th":[962,158,16.4],"3rd|Up 2+|Minor|5th+":[1902,321,16.9],"3rd|Up 2+|Minor|Any":[4203,715,17.0],"Any|Any|Any|1st":[11912,2460,20.7],"Any|Any|Any|2nd":[11037,2230,20.2],"Any|Any|Any|3rd":[8773,1791,20.4],"Any|Any|Any|4th":[6366,1337,21.0],"Any|Any|Any|5th+":[8933,1870,20.9],"Any|Any|Any|Any":[47021,9688,20.6],"Any|Any|Major|1st":[280,92,32.9],"Any|Any|Major|2nd":[352,153,43.5],"Any|Any|Major|3rd":[306,100,32.7],"Any|Any|Major|4th":[308,115,37.3],"Any|Any|Major|5th+":[543,202,37.2],"Any|Any|Major|Any":[1789,662,37.0],"Any|Any|Minor|1st":[11632,2368,20.4],"Any|Any|Minor|2nd":[10685,2077,19.4],"Any|Any|Minor|3rd":[8467,1691,20.0],"Any|Any|Minor|4th":[6058,1222,20.2],"Any|Any|Minor|5th+":[8390,1668,19.9],"Any|Any|Minor|Any":[45232,9026,20.0],"Any|Down 1|Any|1st":[1804,385,21.3],"Any|Down 1|Any|2nd":[2041,430,21.1],"Any|Down 1|Any|3rd":[1545,321,20.8],"Any|Down 1|Any|4th":[1034,240,23.2],"Any|Down 1|Any|5th+":[1142,285,25.0],"Any|Down 1|Any|Any":[7566,1661,22.0],"Any|Down 1|Major|1st":[37,11,29.7],"Any|Down 1|Major|2nd":[72,27,37.5],"Any|Down 1|Major|3rd":[61,17,27.9],"Any|Down 1|Major|4th":[49,25,51.0],"Any|Down 1|Major|5th+":[70,32,45.7],"Any|Down 1|Major|Any":[289,112,38.8],"Any|Down 1|Minor|1st":[1767,374,21.2],"Any|Down 1|Minor|2nd":[1969,403,20.5],"Any|Down 1|Minor|3rd":[1484,304,20.5],"Any|Down 1|Minor|4th":[985,215,21.8],"Any|Down 1|Minor|5th+":[1072,253,23.6],"Any|Down 1|Minor|Any":[7277,1549,21.3],"Any|Down 2+|Any|1st":[576,142,24.7],"Any|Down 2+|Any|2nd":[1250,317,25.4],"Any|Down 2+|Any|3rd":[1411,327,23.2],"Any|Down 2+|Any|4th":[1328,319,24.0],"Any|Down 2+|Any|5th+":[2634,612,23.2],"Any|Down 2+|Any|Any":[7199,1717,23.9],"Any|Down 2+|Major|1st":[11,3,27.3],"Any|Down 2+|Major|2nd":[48,18,37.5],"Any|Down 2+|Major|3rd":[56,16,28.6],"Any|Down 2+|Major|4th":[72,24,33.3],"Any|Down 2+|Major|5th+":[180,77,42.8],"Any|Down 2+|Major|Any":[367,138,37.6],"Any|Down 2+|Minor|1st":[565,139,24.6],"Any|Down 2+|Minor|2nd":[1202,299,24.9],"Any|Down 2+|Minor|3rd":[1355,311,23.0],"Any|Down 2+|Minor|4th":[1256,295,23.5],"Any|Down 2+|Minor|5th+":[2454,535,21.8],"Any|Down 2+|Minor|Any":[6832,1579,23.1],"Any|Tied|Any|1st":[6094,1203,19.7],"Any|Tied|Any|2nd":[3662,752,20.5],"Any|Tied|Any|3rd":[2177,448,20.6],"Any|Tied|Any|4th":[1278,253,19.8],"Any|Tied|Any|5th+":[1337,279,20.9],"Any|Tied|Any|Any":[14548,2935,20.2],"Any|Tied|Major|1st":[148,48,32.4],"Any|Tied|Major|2nd":[116,58,50.0],"Any|Tied|Major|3rd":[86,33,38.4],"Any|Tied|Major|4th":[66,19,28.8],"Any|Tied|Major|5th+":[64,23,35.9],"Any|Tied|Major|Any":[480,181,37.7],"Any|Tied|Minor|1st":[5946,1155,19.4],"Any|Tied|Minor|2nd":[3546,694,19.6],"Any|Tied|Minor|3rd":[2091,415,19.8],"Any|Tied|Minor|4th":[1212,234,19.3],"Any|Tied|Minor|5th+":[1273,256,20.1],"Any|Tied|Minor|Any":[14068,2754,19.6],"Any|Up 1|Any|1st":[2385,516,21.6],"Any|Up 1|Any|2nd":[2235,406,18.2],"Any|Up 1|Any|3rd":[1739,358,20.6],"Any|Up 1|Any|4th":[1146,225,19.6],"Any|Up 1|Any|5th+":[1333,263,19.7],"Any|Up 1|Any|Any":[8838,1768,20.0],"Any|Up 1|Major|1st":[65,25,38.5],"Any|Up 1|Major|2nd":[56,25,44.6],"Any|Up 1|Major|3rd":[53,23,43.4],"Any|Up 1|Major|4th":[54,27,50.0],"Any|Up 1|Major|5th+":[91,31,34.1],"Any|Up 1|Major|Any":[319,131,41.1],"Any|Up 1|Minor|1st":[2320,491,21.2],"Any|Up 1|Minor|2nd":[2179,381,17.5],"Any|Up 1|Minor|3rd":[1686,335,19.9],"Any|Up 1|Minor|4th":[1092,198,18.1],"Any|Up 1|Minor|5th+":[1242,232,18.7],"Any|Up 1|Minor|Any":[8519,1637,19.2],"Any|Up 2+|Any|1st":[1053,214,20.3],"Any|Up 2+|Any|2nd":[1849,325,17.6],"Any|Up 2+|Any|3rd":[1901,337,17.7],"Any|Up 2+|Any|4th":[1580,300,19.0],"Any|Up 2+|Any|5th+":[2487,431,17.3],"Any|Up 2+|Any|Any":[8870,1607,18.1],"Any|Up 2+|Major|1st":[19,5,26.3],"Any|Up 2+|Major|2nd":[60,25,41.7],"Any|Up 2+|Major|3rd":[50,11,22.0],"Any|Up 2+|Major|4th":[67,20,29.9],"Any|Up 2+|Major|5th+":[138,39,28.3],"Any|Up 2+|Major|Any":[334,100,29.9],"Any|Up 2+|Minor|1st":[1034,209,20.2],"Any|Up 2+|Minor|2nd":[1789,300,16.8],"Any|Up 2+|Minor|3rd":[1851,326,17.6],"Any|Up 2+|Minor|4th":[1513,280,18.5],"Any|Up 2+|Minor|5th+":[2349,392,16.7],"Any|Up 2+|Minor|Any":[8536,1507,17.7]};
+var DISC=[["Augustana",3.3,12.2,2.3],["Quinnipiac",3.6,13.9,13.8],["Harvard",3.4,19.5,24.2],["Northeastern",3.9,15.5,25.0],["Dartmouth",3.8,16.5,25.4],["Massachusetts",3.5,19.7,27.1],["Michigan Tech",3.7,18.4,28.2],["Minnesota State",4.3,13.4,28.6],["New Hampshire",3.9,18.1,32.0],["ALA",4.1,16.7,32.8],["Western Michigan",3.9,18.4,33.5],["Michigan State",4.2,17.9,33.8],["Army West Point",4.1,18.4,35.3],["Simon Fraser",5.8,13.7,36.1],["North Dakota",4.5,18.1,37.2],["Bentley",4.4,19.2,37.6],["Clarkson",4.2,18.9,37.6],["Cornell",4.1,18.6,37.7],["Arizona State",4.6,19.4,38.0],["Air Force",4.4,19.3,38.0],["UConn",4.0,18.9,38.4],["Union",4.1,19.1,38.5],["Colgate",4.6,18.3,39.1],["Sacred Heart",3.9,19.5,39.3],["Boston University",4.7,18.6,39.4],["St. Lawrence",4.2,19.6,39.8],["Boston College",4.2,18.9,39.9],["UMass Lowell",4.0,19.7,40.5],["Bowling Green",4.7,19.6,40.7],["AIC",4.1,20.0,41.3],["Penn State",4.2,19.2,41.5],["Minnesota Duluth",4.4,19.5,41.5],["Wisconsin",4.1,19.8,41.7],["RIT",5.1,16.3,42.0],["Providence",4.2,21.0,44.2],["Denver",4.3,20.5,44.3],["Holy Cross",5.5,18.8,46.6],["Colorado College",4.3,22.4,49.6],["Omaha",4.5,22.4,50.5],["Brown",4.2,22.5,51.1],["Stonehill",5.0,24.2,52.8],["LIU",5.0,24.5,53.6],["Michigan",5.0,23.8,54.7],["Miami (OH)",4.8,23.5,55.4],["Alaska Fairbanks",5.3,22.3,55.6],["Canisius",4.6,22.1,56.0],["Lake Superior State",4.5,22.0,56.2],["Robert Morris",4.4,24.3,57.4],["Ferris State",4.7,25.2,59.0],["Northern Michigan",4.6,26.5,60.2],["Notre Dame",4.6,26.7,60.6],["Princeton",4.4,24.8,60.7],["Yale",4.4,24.9,60.7],["Maine",4.1,24.3,61.8],["St. Thomas",4.4,24.7,62.4],["Ohio State",4.2,22.7,62.5],["Niagara",4.3,22.9,62.8],["Merrimack",4.1,24.6,63.2],["Lindenwood",5.1,26.1,65.0],["Alaska Anchorage",4.7,25.0,66.0],["St. Cloud State",4.0,25.2,66.3],["Vermont",3.9,24.6,66.6],["Bemidji State",3.8,27.1,68.5],["RPI",4.0,26.4,69.0],["Minnesota",3.2,25.0,69.1],["U.S. National Under-18 Team",5.8,26.1,97.3]];
+
+var PP_DATA={"Air Force":[662,109,16.5],"AIC":[895,186,20.8],"Army West Point":[796,134,16.8],"Bentley":[1088,207,19.0],"Canisius":[1168,233,19.9],"Holy Cross":[470,70,14.9],"Mercyhurst":[1176,235,20.0],"Niagara":[1161,233,20.1],"RIT":[1147,219,19.1],"Robert Morris":[648,130,20.1],"Sacred Heart":[760,145,19.1],"Stonehill":[522,89,17.0],"Boston College":[502,138,27.5],"Boston University":[1110,290,26.1],"UConn":[507,91,17.9],"Maine":[621,123,19.8],"UMass Lowell":[420,81,19.3],"Merrimack":[278,59,21.2],"New Hampshire":[502,114,22.7],"Northeastern":[705,156,22.1],"Providence":[725,140,19.3],"Vermont":[810,133,16.4],"Massachusetts":[478,117,24.5],"Brown":[619,89,14.4],"Clarkson":[623,104,16.7],"Colgate":[1693,377,22.3],"Cornell":[929,191,20.6],"Dartmouth":[810,157,19.4],"Harvard":[367,82,22.3],"Princeton":[850,158,18.6],"Quinnipiac":[1235,307,24.9],"RPI":[718,142,19.8],"St. Lawrence":[940,151,16.1],"Union":[806,199,24.7],"Yale":[801,121,15.1],"Bowling Green":[396,83,21.0],"Ferris State":[316,48,15.2],"Lake Superior State":[810,177,21.9],"Michigan Tech":[776,176,22.7],"Minnesota State":[753,173,23.0],"Northern Michigan":[807,171,21.2],"St. Thomas":[286,49,17.1],"Bemidji State":[306,65,21.2],"Colorado College":[621,102,16.4],"Denver":[1372,340,24.8],"Miami (OH)":[1023,178,17.4],"Minnesota Duluth":[882,208,23.6],"North Dakota":[1134,312,27.5],"Omaha":[890,208,23.4],"St. Cloud State":[531,130,24.5],"Western Michigan":[865,213,24.6],"Michigan":[501,156,31.1],"Michigan State":[240,73,30.4],"Minnesota":[774,214,27.6],"Ohio State":[275,63,22.9],"Penn State":[265,60,22.6],"Wisconsin":[801,184,23.0],"Notre Dame":[143,27,18.9],"Alaska Anchorage":[692,114,16.5],"Alaska Fairbanks":[340,71,20.9],"Arizona State":[456,121,26.5],"Lindenwood":[157,21,13.4],"LIU":[1052,247,23.5],"Simon Fraser":[35,1,2.9],"Augustana":[142,38,26.8],"ALA":[34,6,17.6]};
+var TREND_DATA={"Air Force":[["2019-20",10,0,0.0],["2020-21",7,4,57.1],["2021-22",148,32,21.6],["2022-23",136,23,16.9],["2023-24",170,33,19.4],["2024-25",102,16,15.7],["2025-26",116,19,16.4]],"AIC":[["2015-16",102,24,23.5],["2019-20",80,12,15.0],["2021-22",75,15,20.0],["2022-23",155,41,26.5],["2023-24",213,36,16.9],["2024-25",191,31,16.2]],"Army West Point":[["2015-16",15,4,26.7],["2019-20",21,2,9.5],["2021-22",102,15,14.7],["2022-23",151,27,17.9],["2023-24",128,26,20.3],["2024-25",116,22,19.0],["2025-26",151,29,19.2]],"Bentley":[["2015-16",11,3,27.3],["2019-20",29,6,20.7],["2021-22",249,50,20.1],["2022-23",246,53,21.5],["2023-24",276,40,14.5],["2024-25",208,38,18.3],["2025-26",201,41,20.4]],"Canisius":[["2019-20",17,6,35.3],["2020-21",5,1,20.0],["2021-22",235,50,21.3],["2022-23",280,60,21.4],["2023-24",277,64,23.1],["2024-25",184,50,27.2],["2025-26",196,34,17.3]],"Holy Cross":[["2015-16",6,1,16.7],["2019-20",24,5,20.8],["2021-22",107,18,16.8],["2022-23",131,28,21.4],["2023-24",104,15,14.4],["2024-25",37,2,5.4],["2025-26",69,20,29.0]],"Mercyhurst":[["2020-21",14,4,28.6],["2021-22",328,83,25.3],["2022-23",226,43,19.0],["2023-24",252,62,24.6],["2024-25",241,74,30.7],["2025-26",185,52,28.1]],"Niagara":[["2015-16",10,3,30.0],["2019-20",5,1,20.0],["2020-21",22,5,22.7],["2021-22",198,49,24.7],["2022-23",213,59,27.7],["2023-24",243,52,21.4],["2024-25",169,33,19.5],["2025-26",268,56,20.9]],"RIT":[["2015-16",10,1,10.0],["2019-20",24,6,25.0],["2020-21",11,1,9.1],["2021-22",208,38,18.3],["2022-23",304,35,11.5],["2023-24",274,36,13.1],["2024-25",214,46,21.5],["2025-26",199,40,20.1]],"Robert Morris":[["2015-16",10,3,30.0],["2019-20",22,9,40.9],["2020-21",70,15,21.4],["2023-24",250,67,26.8],["2024-25",184,47,25.5],["2025-26",194,42,21.6]],"Sacred Heart":[["2015-16",7,1,14.3],["2019-20",20,6,30.0],["2021-22",126,24,19.0],["2022-23",115,29,25.2],["2023-24",143,26,18.2],["2024-25",151,36,23.8],["2025-26",157,17,10.8]],"Stonehill":[["2021-22",37,4,10.8],["2022-23",42,13,31.0],["2023-24",218,62,28.4],["2024-25",174,39,22.4],["2025-26",177,37,20.9]],"Boston College":[["2021-22",74,17,23.0],["2022-23",108,29,26.9],["2023-24",106,11,10.4],["2024-25",95,17,17.9],["2025-26",77,13,16.9]],"Boston University":[["2021-22",193,35,18.1],["2022-23",202,35,17.3],["2023-24",206,40,19.4],["2024-25",221,48,21.7],["2025-26",187,30,16.0]],"UConn":[["2021-22",62,8,12.9],["2022-23",175,39,22.3],["2023-24",108,14,13.0],["2024-25",125,28,22.4],["2025-26",111,17,15.3]],"Maine":[["2019-20",10,1,10.0],["2021-22",103,32,31.1],["2022-23",181,44,24.3],["2023-24",142,35,24.6],["2024-25",142,23,16.2],["2025-26",119,38,31.9]],"UMass Lowell":[["2021-22",91,21,23.1],["2022-23",81,14,17.3],["2023-24",107,20,18.7],["2024-25",71,12,16.9],["2025-26",93,21,22.6]],"Merrimack":[["2021-22",72,13,18.1],["2022-23",76,16,21.1],["2023-24",44,16,36.4],["2024-25",46,11,23.9],["2025-26",35,3,8.6]],"New Hampshire":[["2021-22",90,17,18.9],["2022-23",91,20,22.0],["2023-24",134,28,20.9],["2024-25",137,21,15.3],["2025-26",84,12,14.3]],"Northeastern":[["2019-20",6,1,16.7],["2021-22",130,11,8.5],["2022-23",158,27,17.1],["2023-24",131,21,16.0],["2024-25",162,37,22.8],["2025-26",136,19,14.0]],"Providence":[["2019-20",5,0,0.0],["2021-22",103,24,23.3],["2022-23",94,12,12.8],["2023-24",159,29,18.2],["2024-25",139,30,21.6],["2025-26",191,47,24.6]],"Vermont":[["2021-22",141,33,23.4],["2022-23",148,27,18.2],["2023-24",190,50,26.3],["2024-25",147,38,25.9],["2025-26",125,37,29.6]],"Massachusetts":[["2021-22",99,15,15.2],["2022-23",102,14,13.7],["2023-24",114,33,28.9],["2024-25",110,23,20.9],["2025-26",105,22,21.0]],"Brown":[["2021-22",154,25,16.2],["2022-23",180,38,21.1],["2023-24",114,24,21.1],["2024-25",141,37,26.2],["2025-26",163,45,27.6]],"Clarkson":[["2021-22",97,25,25.8],["2022-23",139,32,23.0],["2023-24",152,36,23.7],["2024-25",132,17,12.9],["2025-26",128,14,10.9]],"Colgate":[["2021-22",337,57,16.9],["2022-23",345,77,22.3],["2023-24",368,78,21.2],["2024-25",287,66,23.0],["2025-26",314,68,21.7]],"Cornell":[["2021-22",174,38,21.8],["2022-23",188,22,11.7],["2023-24",168,41,24.4],["2024-25",180,24,13.3],["2025-26",156,36,23.1]],"Dartmouth":[["2021-22",150,28,18.7],["2022-23",172,29,16.9],["2023-24",161,33,20.5],["2024-25",117,13,11.1],["2025-26",146,20,13.7]],"Harvard":[["2021-22",45,12,26.7],["2022-23",77,14,18.2],["2023-24",70,13,18.6],["2024-25",71,17,23.9],["2025-26",89,13,14.6]],"Princeton":[["2021-22",159,34,21.4],["2022-23",212,62,29.2],["2023-24",157,41,26.1],["2024-25",119,30,25.2],["2025-26",189,39,20.6]],"Quinnipiac":[["2019-20",5,1,20.0],["2021-22",150,16,10.7],["2022-23",193,32,16.6],["2023-24",223,41,18.4],["2024-25",166,15,9.0],["2025-26",204,27,13.2]],"RPI":[["2021-22",191,35,18.3],["2022-23",119,29,24.4],["2023-24",198,73,36.9],["2024-25",169,50,29.6],["2025-26",136,28,20.6]],"St. Lawrence":[["2021-22",201,35,17.4],["2022-23",217,39,18.0],["2023-24",189,46,24.3],["2024-25",179,29,16.2],["2025-26",181,41,22.7]],"Union":[["2021-22",138,26,18.8],["2022-23",139,28,20.1],["2023-24",168,23,13.7],["2024-25",150,37,24.7],["2025-26",129,16,12.4]],"Yale":[["2021-22",148,31,20.9],["2022-23",207,50,24.2],["2023-24",191,41,21.5],["2024-25",164,57,34.8],["2025-26",136,36,26.5]],"Bowling Green":[["2019-20",12,0,0.0],["2020-21",11,0,0.0],["2021-22",100,26,26.0],["2022-23",69,13,18.8],["2023-24",67,18,26.9],["2024-25",79,11,13.9],["2025-26",74,15,20.3]],"Ferris State":[["2019-20",7,1,14.3],["2021-22",82,15,18.3],["2022-23",86,24,27.9],["2023-24",52,15,28.8],["2024-25",57,17,29.8],["2025-26",73,13,17.8]],"Lake Superior State":[["2021-22",171,37,21.6],["2022-23",177,43,24.3],["2023-24",161,27,16.8],["2024-25",150,26,17.3],["2025-26",156,42,26.9]],"Michigan Tech":[["2019-20",10,1,10.0],["2021-22",142,15,10.6],["2022-23",179,25,14.0],["2023-24",163,35,21.5],["2024-25",115,33,28.7],["2025-26",124,28,22.6]],"Minnesota State":[["2021-22",44,3,6.8],["2022-23",164,28,17.1],["2023-24",146,34,23.3],["2024-25",164,22,13.4],["2025-26",161,20,12.4]],"Northern Michigan":[["2019-20",7,3,42.9],["2021-22",172,55,32.0],["2022-23",207,31,15.0],["2023-24",181,55,30.4],["2024-25",166,47,28.3],["2025-26",140,38,27.1]],"St. Thomas":[["2021-22",49,16,32.7],["2022-23",60,11,18.3],["2023-24",70,10,14.3],["2024-25",53,15,28.3],["2025-26",48,13,27.1]],"Bemidji State":[["2019-20",8,2,25.0],["2021-22",73,18,24.7],["2022-23",51,12,23.5],["2023-24",60,17,28.3],["2024-25",45,17,37.8],["2025-26",67,14,20.9]],"Colorado College":[["2020-21",59,21,35.6],["2021-22",172,57,33.1],["2022-23",146,27,18.5],["2023-24",76,13,17.1],["2024-25",120,21,17.5],["2025-26",71,19,26.8]],"Denver":[["2020-21",14,0,0.0],["2021-22",228,47,20.6],["2022-23",256,55,21.5],["2023-24",232,51,22.0],["2024-25",224,42,18.8],["2025-26",157,31,19.7]],"Miami (OH)":[["2021-22",275,70,25.5],["2022-23",262,73,27.9],["2023-24",191,41,21.5],["2024-25",193,42,21.8],["2025-26",180,33,18.3]],"Minnesota Duluth":[["2021-22",222,38,17.1],["2022-23",206,48,23.3],["2023-24",235,47,20.0],["2024-25",135,38,28.1],["2025-26",160,15,9.4]],"North Dakota":[["2020-21",20,0,0.0],["2021-22",264,46,17.4],["2022-23",215,32,14.9],["2023-24",160,30,18.8],["2024-25",217,53,24.4],["2025-26",192,32,16.7]],"Omaha":[["2019-20",8,3,37.5],["2020-21",23,0,0.0],["2021-22",144,34,23.6],["2022-23",129,23,17.8],["2023-24",116,22,19.0],["2024-25",141,36,25.5],["2025-26",207,54,26.1]],"St. Cloud State":[["2020-21",5,0,0.0],["2021-22",78,17,21.8],["2022-23",136,35,25.7],["2023-24",97,31,32.0],["2024-25",114,23,20.2],["2025-26",81,24,29.6]],"Western Michigan":[["2020-21",7,2,28.6],["2021-22",230,41,17.8],["2022-23",181,48,26.5],["2023-24",151,25,16.6],["2024-25",131,21,16.0],["2025-26",159,22,13.8]],"Michigan":[["2021-22",102,14,13.7],["2022-23",143,36,25.2],["2023-24",134,41,30.6],["2024-25",61,17,27.9],["2025-26",135,36,26.7]],"Michigan State":[["2021-22",34,4,11.8],["2022-23",90,20,22.2],["2023-24",86,23,26.7],["2024-25",49,16,32.7],["2025-26",111,17,15.3]],"Minnesota":[["2021-22",109,17,15.6],["2022-23",134,33,24.6],["2023-24",126,29,23.0],["2024-25",89,24,27.0],["2025-26",150,49,32.7]],"Ohio State":[["2021-22",24,5,20.8],["2022-23",67,8,11.9],["2023-24",86,29,33.7],["2024-25",66,14,21.2],["2025-26",54,12,22.2]],"Penn State":[["2021-22",46,10,21.7],["2022-23",43,12,27.9],["2023-24",40,10,25.0],["2024-25",54,8,14.8],["2025-26",60,7,11.7]],"Wisconsin":[["2021-22",28,5,17.9],["2022-23",172,30,17.4],["2023-24",164,19,11.6],["2024-25",130,27,20.8],["2025-26",162,48,29.6]],"Notre Dame":[["2021-22",9,0,0.0],["2022-23",39,15,38.5],["2023-24",51,9,17.6],["2024-25",40,12,30.0],["2025-26",44,11,25.0]],"Alaska Anchorage":[["2019-20",136,38,27.9],["2022-23",144,34,23.6],["2023-24",159,34,21.4],["2024-25",162,40,24.7],["2025-26",153,46,30.1]],"Alaska Fairbanks":[["2019-20",14,3,21.4],["2021-22",83,14,16.9],["2022-23",53,11,20.8],["2023-24",91,22,24.2],["2024-25",36,10,27.8],["2025-26",94,18,19.1]],"Arizona State":[["2019-20",10,0,0.0],["2021-22",96,25,26.0],["2022-23",111,19,17.1],["2023-24",100,16,16.0],["2024-25",88,17,19.3],["2025-26",73,19,26.0]],"Lindenwood":[["2022-23",72,21,29.2],["2023-24",58,20,34.5],["2024-25",47,12,25.5],["2025-26",26,5,19.2]],"LIU":[["2020-21",9,4,44.4],["2021-22",139,43,30.9],["2022-23",191,49,25.7],["2023-24",205,58,28.3],["2024-25",176,25,14.2],["2025-26",211,49,23.2]],"Simon Fraser":[["2022-23",10,1,10.0],["2023-24",15,0,0.0],["2024-25",5,0,0.0],["2025-26",21,6,28.6]],"Augustana":[["2023-24",45,5,11.1],["2024-25",47,6,12.8],["2025-26",42,6,14.3]],"ALA":[["2022-23",22,2,9.1],["2024-25",8,3,37.5],["2025-26",12,2,16.7]],"U.S. National Under-18 Team":[["2021-22",26,9,34.6],["2022-23",5,1,20.0],["2023-24",12,1,8.3],["2025-26",6,3,50.0]]};
+var H2H_DATA={"Air Force":{"AIC":[37,5,13.5],"Bentley":[92,16,17.4],"Boston University":[15,4,26.7],"Colorado College":[34,9,26.5],"Clarkson":[5,1,20.0],"Denver":[24,6,25.0],"Canisius":[116,8,6.9],"Niagara":[58,16,27.6],"RIT":[72,18,25.0],"Mercyhurst":[22,2,9.1],"Wisconsin":[8,2,25.0],"Arizona State":[6,0,0.0],"Maine":[6,0,0.0],"Holy Cross":[25,8,32.0],"Alaska Anchorage":[10,1,10.0],"LIU":[5,1,20.0],"Northeastern":[18,1,5.6],"Robert Morris":[41,7,17.1]},"AIC":{"Air Force":[35,7,20.0],"Army West Point":[57,6,10.5],"Bentley":[82,17,20.7],"Boston College":[5,1,20.0],"Canisius":[66,12,18.2],"Maine":[7,2,28.6],"Massachusetts":[8,2,25.0],"Mercyhurst":[22,5,22.7],"Ohio State":[7,0,0.0],"Quinnipiac":[30,6,20.0],"Robert Morris":[38,8,21.1],"RIT":[60,14,23.3],"Sacred Heart":[40,9,22.5],"Stonehill":[9,0,0.0],"Holy Cross":[66,6,9.1],"LIU":[30,4,13.3],"Niagara":[51,14,27.5],"Penn State":[13,2,15.4],"UMass Lowell":[6,1,16.7],"Vermont":[6,0,0.0],"Cornell":[14,3,21.4],"Providence":[12,3,25.0]},"Army West Point":{"AIC":[49,11,22.4],"Bentley":[84,20,23.8],"Dartmouth":[10,2,20.0],"Canisius":[65,11,16.9],"Massachusetts":[6,4,66.7],"Niagara":[116,20,17.2],"RIT":[74,12,16.2],"Stonehill":[15,0,0.0],"Vermont":[8,1,12.5],"Mercyhurst":[35,11,31.4],"Merrimack":[5,1,20.0],"Robert Morris":[15,0,0.0],"Maine":[10,0,0.0],"Princeton":[7,1,14.3],"Sacred Heart":[6,2,33.3],"UMass Lowell":[8,0,0.0],"Lindenwood":[7,2,28.6],"New Hampshire":[8,0,0.0],"Yale":[8,2,25.0],"Holy Cross":[26,4,15.4],"Wisconsin":[6,1,16.7],"Northeastern":[5,1,20.0],"Union":[12,0,0.0]},"Bentley":{"AIC":[118,27,22.9],"Boston College":[10,0,0.0],"Air Force":[118,16,13.6],"Army West Point":[98,18,18.4],"Canisius":[78,14,17.9],"Holy Cross":[26,4,15.4],"Niagara":[54,14,25.9],"Princeton":[19,3,15.8],"RIT":[94,20,21.3],"Robert Morris":[44,4,9.1],"Sacred Heart":[128,30,23.4],"Alaska Anchorage":[16,2,12.5],"Denver":[8,4,50.0],"Massachusetts":[18,2,11.1],"New Hampshire":[14,4,28.6],"LIU":[6,2,33.3],"Maine":[22,2,9.1],"Mercyhurst":[44,10,22.7],"Bemidji State":[5,1,20.0],"Northeastern":[30,3,10.0],"Stonehill":[22,0,0.0],"UMass Lowell":[6,2,33.3],"Boston University":[15,2,13.3],"Ohio State":[18,2,11.1],"Union":[14,6,42.9]},"Canisius":{"AIC":[63,15,23.8],"Bentley":[70,15,21.4],"Clarkson":[6,0,0.0],"Colgate":[12,4,33.3],"Air Force":[121,24,19.8],"Army West Point":[99,10,10.1],"Maine":[6,4,66.7],"Holy Cross":[50,10,20.0],"LIU":[6,2,33.3],"Mercyhurst":[100,20,20.0],"Niagara":[136,24,17.6],"RIT":[146,36,24.7],"Robert Morris":[51,13,25.5],"Sacred Heart":[92,16,17.4],"St. Lawrence":[18,4,22.2],"Minnesota State":[18,4,22.2],"Penn State":[20,6,30.0],"RPI":[52,16,30.8],"Miami (OH)":[36,10,27.8],"Ferris State":[13,3,23.1],"Minnesota":[8,8,100.0],"Michigan State":[18,4,22.2],"Stonehill":[5,2,40.0]},"Holy Cross":{"AIC":[63,11,17.5],"Bentley":[20,2,10.0],"Brown":[14,0,0.0],"North Dakota":[31,10,32.3],"Army West Point":[22,4,18.2],"Quinnipiac":[30,10,33.3],"Canisius":[52,14,26.9],"Air Force":[36,4,11.1],"Maine":[10,2,20.0],"Northeastern":[10,2,20.0],"Sacred Heart":[10,7,70.0],"Boston University":[16,4,25.0],"UConn":[15,0,0.0],"RIT":[62,4,6.5],"LIU":[10,2,20.0],"New Hampshire":[8,2,25.0],"Vermont":[10,2,20.0],"Robert Morris":[7,2,28.6]},"Mercyhurst":{"AIC":[29,9,31.0],"Boston College":[34,8,23.5],"Bentley":[40,16,40.0],"Bowling Green":[12,4,33.3],"Clarkson":[6,0,0.0],"Colgate":[34,6,17.6],"North Dakota":[26,15,57.7],"Air Force":[40,12,30.0],"Army West Point":[49,12,24.5],"Canisius":[82,20,24.4],"Minnesota":[10,6,60.0],"Alaska Anchorage":[16,2,12.5],"Niagara":[96,18,18.8],"RIT":[74,14,18.9],"Robert Morris":[62,20,32.3],"Sacred Heart":[71,6,8.5],"RPI":[30,8,26.7],"Union":[18,10,55.6],"Miami (OH)":[30,4,13.3],"Ohio State":[18,6,33.3],"New Hampshire":[17,4,23.5],"Boston University":[38,13,34.2],"Dartmouth":[7,0,0.0],"Providence":[20,6,30.0],"Stonehill":[16,8,50.0],"UMass Lowell":[27,5,18.5],"Massachusetts":[32,6,18.8],"Vermont":[54,10,18.5],"Northeastern":[28,10,35.7],"UConn":[12,6,50.0],"Maine":[35,5,14.3],"Brown":[9,1,11.1],"St. Lawrence":[20,2,10.0],"Michigan":[11,7,63.6]},"Niagara":{"AIC":[68,21,30.9],"Bentley":[68,14,20.6],"Bowling Green":[16,0,0.0],"Colgate":[40,12,30.0],"Denver":[16,4,25.0],"North Dakota":[20,7,35.0],"Air Force":[48,10,20.8],"Army West Point":[152,28,18.4],"Canisius":[115,33,28.7],"Mercyhurst":[94,24,25.5],"Michigan":[5,2,40.0],"Miami (OH)":[18,2,11.1],"Omaha":[10,4,40.0],"RPI":[16,2,12.5],"RIT":[82,18,22.0],"Robert Morris":[84,15,17.9],"Sacred Heart":[113,24,21.2],"St. Lawrence":[42,8,19.0],"Union":[10,4,40.0],"Penn State":[6,0,0.0]},"RIT":{"AIC":[89,18,20.2],"Bentley":[102,8,7.8],"Bowling Green":[9,2,22.2],"Clarkson":[32,2,6.2],"Colgate":[34,4,11.8],"Army West Point":[50,13,26.0],"Maine":[12,0,0.0],"Canisius":[162,34,21.0],"Holy Cross":[92,18,19.6],"Princeton":[44,4,9.1],"Mercyhurst":[96,18,18.8],"Lake Superior State":[6,2,33.3],"Miami (OH)":[8,2,25.0],"Niagara":[134,18,13.4],"Air Force":[37,2,5.4],"Penn State":[13,5,38.5],"Robert Morris":[85,17,20.0],"Sacred Heart":[42,3,7.1],"New Hampshire":[20,4,20.0],"St. Lawrence":[32,2,6.2],"Arizona State":[15,1,6.7],"Union":[20,2,10.0],"North Dakota":[7,2,28.6]},"Robert Morris":{"AIC":[32,7,21.9],"Bentley":[44,14,31.8],"North Dakota":[16,6,37.5],"Army West Point":[23,2,8.7],"Canisius":[68,21,30.9],"Minnesota":[16,4,25.0],"Alaska Anchorage":[12,2,16.7],"Mercyhurst":[34,7,20.6],"LIU":[17,4,23.5],"Miami (OH)":[20,2,10.0],"Niagara":[124,27,21.8],"RIT":[110,29,26.4],"Air Force":[36,6,16.7],"Sacred Heart":[30,10,33.3],"Arizona State":[24,12,50.0],"Lindenwood":[6,1,16.7],"Massachusetts":[5,2,40.0],"Bowling Green":[14,5,35.7],"Stonehill":[10,0,0.0],"Holy Cross":[7,1,14.3]},"Sacred Heart":{"AIC":[55,12,21.8],"Bentley":[98,20,20.4],"Colgate":[16,4,25.0],"Cornell":[14,0,0.0],"Quinnipiac":[14,2,14.3],"Canisius":[66,8,12.1],"Holy Cross":[16,1,6.2],"Princeton":[10,0,0.0],"Boston University":[14,6,42.9],"Mercyhurst":[58,10,17.2],"LIU":[13,2,15.4],"Niagara":[110,24,21.8],"RIT":[92,14,15.2],"Robert Morris":[29,4,13.8],"Merrimack":[10,4,40.0],"Yale":[38,12,31.6]},"Stonehill":{"AIC":[7,1,14.3],"Boston College":[10,6,60.0],"Bentley":[30,4,13.3],"Brown":[23,2,8.7],"Dartmouth":[14,4,28.6],"Providence":[6,0,0.0],"Army West Point":[8,0,0.0],"Maine":[10,6,60.0],"Quinnipiac":[12,8,66.7],"Alaska Anchorage":[18,0,0.0],"LIU":[208,62,29.8],"Lake Superior State":[16,4,25.0],"Mercyhurst":[24,4,16.7],"Northeastern":[26,10,38.5],"Robert Morris":[20,10,50.0],"Sacred Heart":[14,2,14.3],"St. Lawrence":[16,2,12.5],"Alaska Fairbanks":[10,1,10.0],"Lindenwood":[15,1,6.7],"Penn State":[10,1,10.0],"Simon Fraser":[5,0,0.0],"Massachusetts":[8,4,50.0],"Vermont":[10,0,0.0],"Minnesota Duluth":[13,5,38.5],"New Hampshire":[6,0,0.0],"Union":[26,2,7.7],"Arizona State":[10,1,10.0],"St. Thomas":[16,2,12.5]},"Boston College":{"Harvard":[20,6,30.0],"Lake Superior State":[5,1,20.0],"Providence":[38,8,21.1],"Quinnipiac":[26,3,11.5],"Stonehill":[10,2,20.0],"UConn":[46,4,8.7],"Bentley":[6,2,33.3],"Denver":[6,0,0.0],"Maine":[32,10,31.2],"Merrimack":[20,3,15.0],"St. Cloud State":[18,0,0.0],"LIU":[8,0,0.0],"Michigan":[6,0,0.0],"New Hampshire":[12,2,16.7],"Vermont":[49,18,36.7],"Arizona State":[6,2,33.3],"Northeastern":[44,6,13.6],"Dartmouth":[8,0,0.0],"Mercyhurst":[30,5,16.7],"Colorado College":[5,2,40.0],"RPI":[6,1,16.7]},"Boston University":{"Army West Point":[6,0,0.0],"Bentley":[15,1,6.7],"Air Force":[15,0,0.0],"Brown":[10,0,0.0],"Colgate":[18,2,11.1],"Cornell":[31,6,19.4],"Denver":[8,0,0.0],"North Dakota":[30,8,26.7],"Providence":[100,14,14.0],"Maine":[91,27,29.7],"Quinnipiac":[20,4,20.0],"Holy Cross":[14,0,0.0],"Minnesota":[12,4,33.3],"UMass Lowell":[44,6,13.6],"Harvard":[14,3,21.4],"LIU":[10,0,0.0],"Merrimack":[40,6,15.0],"Michigan State":[8,2,25.0],"New Hampshire":[72,14,19.4],"Northeastern":[66,16,24.2],"UConn":[50,8,16.0],"Massachusetts":[54,10,18.5],"Vermont":[52,5,9.6],"Michigan":[34,14,41.2],"Notre Dame":[16,2,12.5],"Union":[8,0,0.0],"Western Michigan":[7,0,0.0],"Yale":[20,6,30.0],"U.S. National Under-18 Team":[5,2,40.0],"Arizona State":[6,0,0.0],"Sacred Heart":[16,0,0.0],"Lake Superior State":[5,1,20.0],"Mercyhurst":[39,6,15.4],"Northern Michigan":[11,6,54.5]},"UConn":{"Boston College":[47,10,21.3],"Colgate":[20,2,10.0],"Cornell":[6,2,33.3],"Dartmouth":[8,2,25.0],"Providence":[40,6,15.0],"Maine":[20,4,20.0],"Quinnipiac":[26,4,15.4],"Holy Cross":[18,3,16.7],"UMass Lowell":[29,2,6.9],"Alaska Anchorage":[5,2,40.0],"Boston University":[64,12,18.8],"LIU":[24,4,16.7],"Mercyhurst":[18,3,16.7],"Northeastern":[46,11,23.9],"Massachusetts":[34,5,14.7],"Merrimack":[24,6,25.0],"New Hampshire":[20,3,15.0],"Yale":[14,4,28.6],"Wisconsin":[12,2,16.7],"Vermont":[36,5,13.9],"Union":[6,1,16.7]},"Maine":{"Boston College":[38,10,26.3],"Bentley":[10,2,20.0],"Colgate":[48,14,29.2],"Dartmouth":[10,0,0.0],"Denver":[34,12,35.3],"Providence":[54,10,18.5],"Air Force":[8,2,25.0],"Army West Point":[8,0,0.0],"Boston University":[100,36,36.0],"Lindenwood":[6,0,0.0],"Merrimack":[34,8,23.5],"Quinnipiac":[74,18,24.3],"Vermont":[48,11,22.9],"New Hampshire":[40,24,60.0],"UConn":[24,4,16.7],"RIT":[8,0,0.0],"Massachusetts":[18,4,22.2],"Canisius":[10,0,0.0],"Holy Cross":[6,0,0.0],"Alaska Anchorage":[16,2,12.5],"Mercyhurst":[29,8,27.6],"Northeastern":[14,0,0.0],"RPI":[11,1,9.1],"Union":[8,1,12.5]},"UMass Lowell":{"AIC":[10,2,20.0],"Bentley":[8,2,25.0],"Colgate":[26,4,15.4],"Dartmouth":[10,0,0.0],"Denver":[8,0,0.0],"Providence":[56,10,17.9],"Army West Point":[8,2,25.0],"UConn":[23,2,8.7],"Boston University":[62,8,12.9],"Merrimack":[29,10,34.5],"Northeastern":[34,11,32.4],"Omaha":[6,0,0.0],"Harvard":[7,3,42.9],"Miami (OH)":[12,6,50.0],"LIU":[10,2,20.0],"Alaska Anchorage":[9,2,22.2],"Mercyhurst":[28,10,35.7],"St. Lawrence":[10,0,0.0],"Minnesota Duluth":[6,0,0.0],"Vermont":[32,3,9.4],"Western Michigan":[9,0,0.0]},"Merrimack":{"Boston College":[24,6,25.0],"Brown":[14,2,14.3],"Dartmouth":[11,0,0.0],"Providence":[41,13,31.7],"Maine":[35,5,14.3],"Quinnipiac":[7,1,14.3],"UMass Lowell":[28,5,17.9],"Boston University":[37,13,35.1],"New Hampshire":[14,2,14.3],"Sacred Heart":[14,0,0.0],"UConn":[12,6,50.0],"Massachusetts":[33,6,18.2]},"New Hampshire":{"Boston College":[32,12,37.5],"Bentley":[16,0,0.0],"Colgate":[10,1,10.0],"Dartmouth":[10,2,20.0],"Providence":[24,2,8.3],"Army West Point":[6,2,33.3],"Maine":[34,0,0.0],"Quinnipiac":[32,6,18.8],"Princeton":[18,6,33.3],"Boston University":[80,26,32.5],"Mercyhurst":[24,4,16.7],"LIU":[16,2,12.5],"Merrimack":[17,4,23.5],"Northeastern":[34,3,8.8],"RIT":[26,8,30.8],"RPI":[6,1,16.7],"St. Lawrence":[5,0,0.0],"Stonehill":[12,0,0.0],"UConn":[21,2,9.5],"Massachusetts":[12,4,33.3],"Harvard":[5,2,40.0],"Union":[17,3,17.6],"Vermont":[44,3,6.8]},"Northeastern":{"AIC":[6,1,16.7],"Boston College":[60,13,21.7],"Bentley":[34,2,5.9],"Brown":[16,4,25.0],"Denver":[20,4,20.0],"Providence":[42,10,23.8],"Quinnipiac":[25,2,8.0],"Holy Cross":[6,0,0.0],"UMass Lowell":[33,6,18.2],"Alaska Anchorage":[6,0,0.0],"Boston University":[83,13,15.7],"LIU":[36,4,11.1],"Mercyhurst":[30,6,20.0],"New Hampshire":[36,3,8.3],"Massachusetts":[27,2,7.4],"UConn":[36,6,16.7],"Maine":[13,2,15.4],"Army West Point":[6,2,33.3],"Harvard":[19,6,31.6],"Stonehill":[18,2,11.1],"Vermont":[38,8,21.1],"RPI":[19,4,21.1],"Western Michigan":[12,2,16.7],"Air Force":[12,0,0.0],"Omaha":[10,1,10.0]},"Providence":{"AIC":[10,1,10.0],"Boston College":[44,20,45.5],"Bowling Green":[12,2,16.7],"Denver":[40,10,25.0],"Alaska Fairbanks":[7,2,28.6],"Boston University":[84,22,26.2],"Colorado College":[7,1,14.3],"Maine":[32,4,12.5],"Merrimack":[40,9,22.5],"Michigan":[31,10,32.3],"New Hampshire":[32,0,0.0],"Northeastern":[48,20,41.7],"Quinnipiac":[19,2,10.5],"UConn":[39,6,15.4],"UMass Lowell":[52,8,15.4],"Massachusetts":[30,6,20.0],"Vermont":[39,2,5.1],"Arizona State":[5,1,20.0],"LIU":[6,2,33.3],"St. Lawrence":[8,0,0.0],"Alaska Anchorage":[8,0,0.0],"Princeton":[8,0,0.0],"Mercyhurst":[19,5,26.3],"RPI":[10,1,10.0]},"Vermont":{"AIC":[6,0,0.0],"Boston College":[46,12,26.1],"Cornell":[10,4,40.0],"Colgate":[20,4,20.0],"Dartmouth":[19,4,21.1],"Providence":[26,7,26.9],"Army West Point":[5,0,0.0],"Maine":[40,9,22.5],"Holy Cross":[6,0,0.0],"Boston University":[75,28,37.3],"LIU":[34,10,29.4],"Mercyhurst":[58,14,24.1],"Northeastern":[38,6,15.8],"RPI":[8,0,0.0],"St. Lawrence":[20,6,30.0],"Stonehill":[10,2,20.0],"UConn":[40,16,40.0],"Union":[14,2,14.3],"New Hampshire":[32,8,25.0],"St. Cloud State":[9,4,44.4],"UMass Lowell":[26,7,26.9],"Massachusetts":[27,7,25.9],"Denver":[6,0,0.0],"St. Thomas":[16,0,0.0],"Lindenwood":[8,1,12.5],"Yale":[10,0,0.0]},"Massachusetts":{"AIC":[10,1,10.0],"Boston College":[8,4,50.0],"Bentley":[8,2,25.0],"Cornell":[18,4,22.2],"Denver":[18,2,11.1],"Providence":[32,2,6.2],"Maine":[12,8,66.7],"Quinnipiac":[6,4,66.7],"Minnesota":[8,4,50.0],"Boston University":[56,16,28.6],"LIU":[12,0,0.0],"Mercyhurst":[37,3,8.1],"Michigan":[36,12,33.3],"Minnesota State":[11,0,0.0],"Northeastern":[31,5,16.1],"Omaha":[28,6,21.4],"UConn":[29,5,17.2],"Merrimack":[37,3,8.1],"New Hampshire":[24,4,16.7],"Alaska Fairbanks":[5,1,20.0],"Harvard":[7,2,28.6],"Vermont":[32,4,12.5]},"Brown":{"Colgate":[63,19,30.2],"Cornell":[62,8,12.9],"Dartmouth":[61,14,23.0],"Harvard":[19,3,15.8],"Northeastern":[17,3,17.6],"Princeton":[54,14,25.9],"Quinnipiac":[96,30,31.2],"Stonehill":[20,4,20.0],"Yale":[96,12,12.5],"Merrimack":[10,3,30.0],"Holy Cross":[8,2,25.0],"LIU":[24,8,33.3],"Massachusetts":[8,2,25.0],"Boston University":[8,0,0.0],"Union":[43,9,20.9],"Clarkson":[29,9,31.0],"Mercyhurst":[7,2,28.6],"RPI":[28,6,21.4],"St. Lawrence":[39,6,15.4]},"Clarkson":{"Brown":[31,4,12.9],"Canisius":[12,4,33.3],"Colgate":[49,8,16.3],"Dartmouth":[26,8,30.8],"Harvard":[18,4,22.2],"Princeton":[45,5,11.1],"RPI":[34,10,29.4],"RIT":[28,0,0.0],"St. Lawrence":[58,14,24.1],"Union":[40,14,35.0],"Yale":[44,4,9.1],"Denver":[12,2,16.7],"North Dakota":[10,3,30.0],"Providence":[6,0,0.0],"Quinnipiac":[36,3,8.3],"Air Force":[5,0,0.0],"Alaska Fairbanks":[14,2,14.3],"Lake Superior State":[30,6,20.0],"Mercyhurst":[10,2,20.0],"Cornell":[20,10,50.0],"Massachusetts":[6,2,33.3],"Wisconsin":[18,0,0.0],"New Hampshire":[6,0,0.0]},"Colgate":{"Brown":[60,8,13.3],"Arizona State":[49,10,20.4],"Augustana":[11,3,27.3],"Miami (OH)":[43,5,11.6],"Minnesota Duluth":[36,6,16.7],"St. Cloud State":[12,4,33.3],"Western Michigan":[72,14,19.4],"Denver":[59,14,23.7],"Northern Michigan":[44,12,27.3],"LIU":[42,10,23.8],"North Dakota":[36,6,16.7],"Simon Fraser":[6,0,0.0],"Union":[90,22,24.4],"St. Lawrence":[58,12,20.7],"Colgate":[20,2,10.0],"Clarkson":[40,8,20.0],"Cornell":[146,28,19.2],"Dartmouth":[74,10,13.5],"Harvard":[33,7,21.2],"Lake Superior State":[6,2,33.3],"Michigan Tech":[12,2,16.7],"Niagara":[26,6,23.1],"Quinnipiac":[120,35,29.2],"RPI":[62,16,25.8],"Penn State":[12,4,33.3],"New Hampshire":[16,6,37.5],"Alaska Fairbanks":[9,1,11.1],"Boston University":[12,4,33.3],"Canisius":[14,2,14.3],"Maine":[34,4,11.8],"Minnesota State":[9,3,33.3],"Princeton":[52,12,23.1],"RIT":[40,6,15.0],"Yale":[80,10,12.5],"Sacred Heart":[20,4,20.0],"UMass Lowell":[20,14,70.0],"UConn":[19,2,10.5],"Mercyhurst":[28,6,21.4],"Michigan":[8,6,75.0],"Vermont":[26,2,7.7],"Michigan State":[9,3,33.3]},"Cornell":{"AIC":[10,0,0.0],"Brown":[52,6,11.5],"Colgate":[138,42,30.4],"Vermont":[6,0,0.0],"Clarkson":[22,6,27.3],"Boston University":[38,4,10.5],"Dartmouth":[57,16,28.1],"Harvard":[30,4,13.3],"Princeton":[65,10,15.4],"Quinnipiac":[58,10,17.2],"RPI":[46,6,13.0],"St. Lawrence":[56,10,17.9],"Union":[68,16,23.5],"Alaska Fairbanks":[11,1,9.1],"Denver":[8,0,0.0],"Massachusetts":[8,6,75.0],"Omaha":[14,4,28.6],"U.S. National Under-18 Team":[8,1,12.5],"Yale":[62,8,12.9],"Arizona State":[7,1,14.3],"Sacred Heart":[16,0,0.0],"North Dakota":[24,4,16.7],"Minnesota Duluth":[26,2,7.7],"UConn":[8,0,0.0]},"Dartmouth":{"Brown":[48,10,20.8],"Clarkson":[36,4,11.1],"Colgate":[87,18,20.7],"Cornell":[70,10,14.3],"Arizona State":[9,2,22.2],"Army West Point":[8,2,25.0],"Harvard":[22,4,18.2],"Merrimack":[8,1,12.5],"Princeton":[72,8,11.1],"Notre Dame":[5,0,0.0],"Quinnipiac":[60,8,13.3],"St. Lawrence":[67,6,9.0],"Stonehill":[12,6,50.0],"Vermont":[10,1,10.0],"Yale":[42,4,9.5],"Providence":[7,1,14.3],"UMass Lowell":[12,0,0.0],"RPI":[30,10,33.3],"Union":[24,4,16.7]},"Harvard":{"Boston College":[23,7,30.4],"Brown":[13,1,7.7],"Colgate":[31,7,22.6],"Clarkson":[21,3,14.3],"Cornell":[32,6,18.8],"Dartmouth":[27,4,14.8],"Quinnipiac":[31,4,12.9],"Princeton":[27,4,14.8],"Boston University":[10,5,50.0],"Michigan":[11,2,18.2],"Northeastern":[15,2,13.3],"RPI":[15,6,40.0],"St. Lawrence":[22,3,13.6],"Massachusetts":[7,3,42.9],"New Hampshire":[6,0,0.0],"Union":[28,5,17.9],"Yale":[13,4,30.8]},"Princeton":{"Bentley":[18,4,22.2],"Bowling Green":[10,2,20.0],"Brown":[30,4,13.3],"Colorado College":[9,2,22.2],"Clarkson":[37,12,32.4],"Colgate":[58,16,27.6],"Cornell":[63,19,30.2],"Dartmouth":[64,14,21.9],"Providence":[10,0,0.0],"Army West Point":[18,3,16.7],"Quinnipiac":[74,20,27.0],"Alaska Fairbanks":[7,3,42.9],"Harvard":[25,5,20.0],"St. Lawrence":[70,18,25.7],"Yale":[48,10,20.8],"Ohio State":[28,10,35.7],"New Hampshire":[12,4,33.3],"Sacred Heart":[14,0,0.0],"LIU":[34,8,23.5],"RIT":[30,8,26.7],"RPI":[34,9,26.5],"Union":[50,12,24.0]},"Quinnipiac":{"AIC":[30,3,10.0],"Boston College":[28,6,21.4],"Brown":[50,8,16.0],"Colgate":[91,17,18.7],"Clarkson":[33,5,15.2],"Cornell":[52,10,19.2],"Dartmouth":[47,8,17.0],"North Dakota":[27,9,33.3],"Providence":[16,1,6.2],"Maine":[50,6,12.0],"Alaska Fairbanks":[5,2,40.0],"Boston University":[16,2,12.5],"Harvard":[21,3,14.3],"Holy Cross":[13,2,15.4],"New Hampshire":[28,4,14.3],"Princeton":[64,8,12.5],"Sacred Heart":[12,2,16.7],"St. Lawrence":[48,6,12.5],"Stonehill":[6,0,0.0],"UConn":[22,2,9.1],"Yale":[62,2,3.2],"Northeastern":[16,3,18.8],"LIU":[27,4,14.8],"Michigan":[10,4,40.0],"Arizona State":[5,1,20.0],"RPI":[25,1,4.0],"Union":[34,4,11.8]},"RPI":{"Clarkson":[68,10,14.7],"Colgate":[46,14,30.4],"Cornell":[66,14,21.2],"Canisius":[44,13,29.5],"Mercyhurst":[16,4,25.0],"LIU":[8,0,0.0],"Minnesota State":[18,8,44.4],"Minnesota":[6,4,66.7],"Northeastern":[34,13,38.2],"Niagara":[20,2,10.0],"Brown":[19,2,10.5],"Dartmouth":[34,10,29.4],"Harvard":[20,8,40.0],"Miami (OH)":[11,3,27.3],"Princeton":[35,12,34.3],"Providence":[9,2,22.2],"Quinnipiac":[38,15,39.5],"St. Lawrence":[56,10,17.9],"Union":[102,37,36.3],"New Hampshire":[8,3,37.5],"Vermont":[24,6,25.0],"Yale":[54,10,18.5],"Maine":[22,9,40.9],"Bowling Green":[14,4,28.6],"Alaska Fairbanks":[14,1,7.1]},"St. Lawrence":{"Colgate":[125,22,17.6],"Colorado College":[16,0,0.0],"Clarkson":[38,4,10.5],"Cornell":[74,10,13.5],"Dartmouth":[67,10,14.9],"Quinnipiac":[66,13,19.7],"Canisius":[22,2,9.1],"Princeton":[52,10,19.2],"Lake Superior State":[28,8,28.6],"Mercyhurst":[16,6,37.5],"Michigan Tech":[20,6,30.0],"Omaha":[34,8,23.5],"Niagara":[26,10,38.5],"RIT":[14,0,0.0],"RPI":[56,10,17.9],"Brown":[43,3,7.0],"Harvard":[26,6,23.1],"Stonehill":[10,2,20.0],"Union":[56,16,28.6],"UMass Lowell":[13,4,30.8],"North Dakota":[6,3,50.0],"Vermont":[24,6,25.0],"Yale":[64,11,17.2],"Penn State":[12,2,16.7],"Western Michigan":[36,16,44.4]},"Union":{"Bentley":[8,0,0.0],"Brown":[39,7,17.9],"Colgate":[54,8,14.8],"Colorado College":[12,0,0.0],"Clarkson":[30,0,0.0],"Cornell":[46,14,30.4],"Boston University":[8,2,25.0],"Mercyhurst":[18,4,22.2],"LIU":[8,4,50.0],"Lake Superior State":[22,10,45.5],"Niagara":[18,4,22.2],"RIT":[6,2,33.3],"RPI":[79,6,7.6],"St. Lawrence":[78,14,17.9],"Stonehill":[16,2,12.5],"Dartmouth":[34,6,17.6],"Princeton":[44,8,18.2],"Quinnipiac":[31,10,32.3],"Alaska Fairbanks":[5,0,0.0],"Army West Point":[16,2,12.5],"Harvard":[23,4,17.4],"New Hampshire":[21,7,33.3],"UMass Lowell":[6,0,0.0],"Yale":[40,8,20.0],"ALA":[7,1,14.3],"Vermont":[20,4,20.0],"UConn":[9,0,0.0]},"Yale":{"Bowling Green":[6,0,0.0],"Brown":[70,14,20.0],"Clarkson":[36,4,11.1],"Colgate":[70,24,34.3],"Cornell":[48,14,29.2],"Dartmouth":[72,20,27.8],"Denver":[32,10,31.2],"Providence":[14,0,0.0],"Army West Point":[13,3,23.1],"Quinnipiac":[90,32,35.6],"Princeton":[66,18,27.3],"Boston University":[16,8,50.0],"LIU":[22,6,27.3],"RPI":[54,8,14.8],"Sacred Heart":[30,10,33.3],"St. Lawrence":[58,4,6.9],"UConn":[12,10,83.3],"Union":[48,10,20.8],"Vermont":[14,4,28.6],"Harvard":[23,5,21.7]},"Bowling Green":{"Augustana":[12,1,8.3],"Bemidji State":[6,2,33.3],"Niagara":[12,0,0.0],"Princeton":[10,0,0.0],"Mercyhurst":[20,2,10.0],"RIT":[10,0,0.0],"RPI":[17,1,5.9],"Providence":[6,2,33.3],"Miami (OH)":[18,2,11.1],"Yale":[10,0,0.0],"Alaska Anchorage":[12,0,0.0],"Lake Superior State":[67,18,26.9],"Michigan Tech":[56,13,23.2],"Minnesota State":[27,5,18.5],"Northern Michigan":[57,11,19.3],"Robert Morris":[16,1,6.2],"Western Michigan":[8,4,50.0]},"Ferris State":{"Canisius":[20,2,10.0],"Alaska Anchorage":[7,1,14.3],"Lake Superior State":[60,16,26.7],"Miami (OH)":[26,5,19.2],"Michigan Tech":[51,11,21.6],"Minnesota State":[60,16,26.7],"Northern Michigan":[69,18,26.1],"St. Lawrence":[8,4,50.0],"Western Michigan":[35,10,28.6]},"Lake Superior State":{"Colgate":[8,6,75.0],"Clarkson":[22,4,18.2],"Alaska Anchorage":[28,10,35.7],"Augustana":[22,5,22.7],"Bemidji State":[49,15,30.6],"Bowling Green":[60,17,28.3],"Ferris State":[58,9,15.5],"Lindenwood":[7,3,42.9],"Michigan Tech":[88,22,25.0],"Minnesota State":[94,23,24.5],"Northern Michigan":[144,18,12.5],"St. Lawrence":[30,6,20.0],"St. Thomas":[87,18,20.7],"Stonehill":[10,2,20.0],"Wisconsin":[5,2,40.0],"Ohio State":[7,0,0.0],"RIT":[8,0,0.0],"Omaha":[6,1,16.7],"Union":[13,3,23.1]},"Michigan Tech":{"Boston College":[6,5,83.3],"Colgate":[20,4,20.0],"Colorado College":[6,2,33.3],"Minnesota":[6,0,0.0],"Boston University":[6,0,0.0],"Lake Superior State":[76,8,10.5],"Alaska Fairbanks":[26,3,11.5],"Augustana":[14,6,42.9],"Bemidji State":[54,10,18.5],"Bowling Green":[55,12,21.8],"Ferris State":[50,5,10.0],"Minnesota State":[100,18,18.0],"Northern Michigan":[150,38,25.3],"St. Thomas":[66,10,15.2],"Western Michigan":[12,2,16.7],"Arizona State":[8,3,37.5],"Minnesota Duluth":[8,0,0.0],"St. Lawrence":[20,4,20.0],"Wisconsin":[5,0,0.0]},"Minnesota State":{"Colgate":[6,1,16.7],"North Dakota":[22,10,45.5],"Canisius":[19,3,15.8],"Minnesota":[14,2,14.3],"LIU":[6,0,0.0],"Lake Superior State":[103,8,7.8],"Michigan Tech":[89,12,13.5],"Western Michigan":[12,2,16.7],"Augustana":[16,5,31.2],"Wisconsin":[12,0,0.0],"St. Thomas":[34,8,23.5],"Ferris State":[47,7,14.9],"Bemidji State":[48,11,22.9],"Bowling Green":[31,4,12.9],"Northern Michigan":[98,15,15.3],"RPI":[14,2,14.3],"Yale":[8,0,0.0],"Omaha":[21,6,28.6],"St. Cloud State":[11,1,9.1],"Massachusetts":[8,3,37.5],"Minnesota Duluth":[19,2,10.5]},"Northern Michigan":{"Colgate":[54,8,14.8],"Alaska Anchorage":[29,3,10.3],"Lake Superior State":[140,47,33.6],"Michigan Tech":[180,50,27.8],"Minnesota State":[131,40,30.5],"Augustana":[11,4,36.4],"Bemidji State":[52,17,32.7],"Bowling Green":[56,10,17.9],"Colorado College":[6,2,33.3],"Ferris State":[64,14,21.9],"Ohio State":[6,1,16.7],"St. Thomas":[39,6,15.4],"Massachusetts":[8,1,12.5],"Arizona State":[17,5,29.4],"Alaska Fairbanks":[6,0,0.0],"Minnesota Duluth":[36,14,38.9],"North Dakota":[10,3,30.0],"Boston University":[9,1,11.1]},"St. Thomas":{"North Dakota":[6,4,66.7],"LIU":[19,5,26.3],"Lake Superior State":[58,12,20.7],"Michigan Tech":[65,15,23.1],"Minnesota State":[50,16,32.0],"Northern Michigan":[36,5,13.9],"Stonehill":[18,5,27.8],"Arizona State":[6,1,16.7],"Minnesota Duluth":[10,0,0.0],"Vermont":[12,2,16.7]},"Bemidji State":{"Bowling Green":[6,0,0.0],"North Dakota":[26,5,19.2],"Minnesota":[7,1,14.3],"Alaska Anchorage":[16,2,12.5],"Lake Superior State":[45,11,24.4],"Michigan Tech":[61,19,31.1],"Minnesota State":[38,9,23.7],"Northern Michigan":[47,12,25.5],"Minnesota Duluth":[31,15,48.4]},"Colorado College":{"Air Force":[29,7,24.1],"Providence":[17,1,5.9],"Arizona State":[9,3,33.3],"North Dakota":[71,13,18.3],"Denver":[140,32,22.9],"Omaha":[81,17,21.0],"Minnesota":[16,2,12.5],"Alaska Anchorage":[20,4,20.0],"Minnesota Duluth":[50,14,28.0],"St. Cloud State":[45,17,37.8],"Princeton":[5,1,20.0],"Miami (OH)":[68,18,26.5],"Western Michigan":[36,20,55.6],"St. Lawrence":[12,2,16.7],"Michigan Tech":[18,2,11.1],"Northern Michigan":[6,1,16.7]},"Denver":{"Boston College":[6,0,0.0],"Colgate":[45,6,13.3],"Colorado College":[105,13,12.4],"Clarkson":[10,3,30.0],"Cornell":[10,0,0.0],"Alaska Anchorage":[20,4,20.0],"Arizona State":[47,16,34.0],"Maine":[22,2,9.1],"Miami (OH)":[137,22,16.1],"Minnesota Duluth":[110,28,25.5],"North Dakota":[112,28,25.0],"Northeastern":[16,0,0.0],"Omaha":[78,20,25.6],"St. Cloud State":[94,18,19.1],"Western Michigan":[87,20,23.0],"Wisconsin":[16,2,12.5],"Lindenwood":[11,0,0.0],"Providence":[46,18,39.1],"Yale":[16,0,0.0],"Air Force":[14,0,0.0],"Alaska Fairbanks":[19,4,21.1],"Massachusetts":[10,2,20.0],"Niagara":[12,2,16.7],"UMass Lowell":[8,0,0.0],"Vermont":[7,0,0.0]},"Miami (OH)":{"Bowling Green":[12,2,16.7],"Colgate":[35,8,22.9],"Colorado College":[61,13,21.3],"Denver":[182,60,33.0],"North Dakota":[96,31,32.3],"Canisius":[24,4,16.7],"UMass Lowell":[14,2,14.3],"Alaska Anchorage":[20,2,10.0],"Mercyhurst":[20,4,20.0],"LIU":[20,6,30.0],"Arizona State":[30,7,23.3],"Ferris State":[24,4,16.7],"Minnesota Duluth":[94,20,21.3],"Omaha":[176,34,19.3],"RIT":[6,0,0.0],"St. Cloud State":[60,12,20.0],"Western Michigan":[87,22,25.3],"Lindenwood":[8,1,12.5],"Robert Morris":[10,0,0.0],"Niagara":[18,2,11.1],"Michigan State":[21,5,23.8],"RPI":[9,2,22.2]},"Minnesota Duluth":{"Colgate":[42,10,23.8],"Colorado College":[41,7,17.1],"Cornell":[26,4,15.4],"Denver":[134,18,13.4],"North Dakota":[110,30,27.3],"Michigan":[10,8,80.0],"Miami (OH)":[110,6,5.5],"Michigan Tech":[16,0,0.0],"Minnesota State":[20,7,35.0],"Northern Michigan":[46,18,39.1],"Omaha":[58,14,24.1],"St. Cloud State":[91,15,16.5],"Stonehill":[12,0,0.0],"Arizona State":[19,5,26.3],"Augustana":[8,2,25.0],"Bemidji State":[27,4,14.8],"Alaska Fairbanks":[16,1,6.2],"Minnesota":[20,4,20.0],"Western Michigan":[116,20,17.2],"UMass Lowell":[6,2,33.3],"Wisconsin":[12,6,50.0]},"North Dakota":{"Colorado College":[85,12,14.1],"Colgate":[43,14,32.6],"Cornell":[28,2,7.1],"Denver":[98,20,20.4],"Arizona State":[20,10,50.0],"Bemidji State":[26,1,3.8],"Mercyhurst":[10,1,10.0],"Miami (OH)":[94,16,17.0],"Minnesota Duluth":[106,20,18.9],"Minnesota":[31,2,6.5],"Omaha":[106,22,20.8],"Quinnipiac":[24,2,8.3],"St. Cloud State":[57,15,26.3],"St. Thomas":[8,2,25.0],"Western Michigan":[126,26,20.6],"Wisconsin":[6,0,0.0],"Boston University":[34,10,29.4],"Minnesota State":[14,0,0.0],"Robert Morris":[12,2,16.7],"Alaska Fairbanks":[5,2,40.0],"Holy Cross":[22,1,4.5],"Niagara":[22,2,9.1],"LIU":[14,2,14.3],"Northern Michigan":[18,1,5.6],"RIT":[6,0,0.0],"St. Lawrence":[10,0,0.0]},"Omaha":{"Colorado College":[87,12,13.8],"Colgate":[8,4,50.0],"Cornell":[12,4,33.3],"Denver":[80,14,17.5],"North Dakota":[120,37,30.8],"Minnesota":[11,3,27.3],"Alaska Anchorage":[8,3,37.5],"LIU":[36,8,22.2],"Lake Superior State":[7,0,0.0],"Miami (OH)":[112,22,19.6],"Minnesota State":[21,4,19.0],"Arizona State":[17,6,35.3],"Augustana":[18,5,27.8],"Massachusetts":[16,6,37.5],"Minnesota Duluth":[49,6,12.2],"St. Cloud State":[18,12,66.7],"Wisconsin":[8,0,0.0],"Niagara":[12,2,16.7],"St. Lawrence":[18,4,22.2],"Western Michigan":[51,8,15.7]},"St. Cloud State":{"Boston College":[10,2,20.0],"Colgate":[12,3,25.0],"Colorado College":[43,7,16.3],"Clarkson":[6,4,66.7],"Denver":[100,28,28.0],"North Dakota":[57,15,26.3],"Minnesota":[14,2,14.3],"Alaska Anchorage":[7,2,28.6],"Miami (OH)":[44,18,40.9],"Minnesota State":[13,2,15.4],"Omaha":[24,6,25.0],"Wisconsin":[12,0,0.0],"Minnesota Duluth":[76,21,27.6],"Alaska Fairbanks":[9,2,22.2],"Vermont":[6,1,16.7],"Western Michigan":[58,14,24.1]},"Western Michigan":{"Colgate":[88,8,9.1],"Colorado College":[33,2,6.1],"Denver":[104,29,27.9],"North Dakota":[117,22,18.8],"Alaska Anchorage":[16,6,37.5],"Boston University":[8,2,25.0],"Miami (OH)":[83,11,13.3],"Michigan Tech":[12,0,0.0],"Minnesota State":[13,1,7.7],"Northeastern":[6,2,33.3],"St. Lawrence":[36,2,5.6],"Minnesota Duluth":[100,28,28.0],"Michigan":[12,5,41.7],"Arizona State":[10,0,0.0],"Ferris State":[33,4,12.1],"St. Cloud State":[63,14,22.2],"UMass Lowell":[5,0,0.0],"Omaha":[69,17,24.6],"Bowling Green":[13,3,23.1],"Lindenwood":[6,0,0.0]},"Michigan":{"Bentley":[8,0,0.0],"Bowling Green":[6,0,0.0],"Denver":[16,0,0.0],"Providence":[23,8,34.8],"Quinnipiac":[12,0,0.0],"Minnesota":[134,38,28.4],"Boston University":[36,15,41.7],"Harvard":[13,2,15.4],"Mercyhurst":[6,0,0.0],"Michigan State":[29,8,27.6],"Minnesota Duluth":[16,2,12.5],"Notre Dame":[17,4,23.5],"Penn State":[17,6,35.3],"Wisconsin":[132,39,29.5],"Arizona State":[6,1,16.7],"Ohio State":[9,5,55.6],"Lindenwood":[12,1,8.3],"Massachusetts":[32,6,18.8],"Niagara":[7,1,14.3],"Western Michigan":[14,3,21.4]},"Michigan State":{"Minnesota":[121,30,24.8],"Boston University":[24,6,25.0],"Michigan":[38,14,36.8],"Miami (OH)":[27,2,7.4],"Colgate":[6,1,16.7],"UConn":[10,0,0.0],"Wisconsin":[106,22,20.8],"Canisius":[19,3,15.8],"Lindenwood":[6,0,0.0],"LIU":[6,0,0.0]},"Minnesota":{"Boston College":[6,2,33.3],"Colorado College":[10,2,20.0],"North Dakota":[43,13,30.2],"Air Force":[6,2,33.3],"Canisius":[8,0,0.0],"LIU":[16,8,50.0],"Michigan State":[67,25,37.3],"Michigan Tech":[6,2,33.3],"Michigan":[102,14,13.7],"Notre Dame":[35,4,11.4],"Ohio State":[49,15,30.6],"Penn State":[47,6,12.8],"Wisconsin":[80,26,32.5],"Alaska Fairbanks":[8,2,25.0],"Mercyhurst":[16,4,25.0],"Omaha":[9,2,22.2],"Robert Morris":[6,2,33.3],"Arizona State":[8,1,12.5],"Boston University":[6,2,33.3],"Minnesota State":[10,0,0.0],"St. Cloud State":[12,2,16.7],"RPI":[10,4,40.0],"Minnesota Duluth":[17,4,23.5]},"Ohio State":{"AIC":[5,1,20.0],"Bentley":[9,0,0.0],"Minnesota":[82,27,32.9],"Princeton":[24,6,25.0],"Mercyhurst":[19,4,21.1],"LIU":[11,1,9.1],"Lake Superior State":[5,1,20.0],"Michigan":[12,3,25.0],"Northern Michigan":[6,0,0.0],"UConn":[10,0,0.0],"Wisconsin":[102,22,21.6],"Lindenwood":[6,1,16.7]},"Penn State":{"AIC":[6,3,50.0],"Colgate":[7,1,14.3],"North Dakota":[6,3,50.0],"Canisius":[21,4,19.0],"Minnesota":[58,16,27.6],"Mercyhurst":[5,1,20.0],"LIU":[16,1,6.2],"Michigan":[18,6,33.3],"Niagara":[11,0,0.0],"RIT":[6,0,0.0],"St. Lawrence":[8,0,0.0],"Stonehill":[11,2,18.2],"Wisconsin":[56,11,19.6]},"Wisconsin":{"Clarkson":[10,2,20.0],"Dartmouth":[6,0,0.0],"Denver":[18,2,11.1],"North Dakota":[20,0,0.0],"Quinnipiac":[6,0,0.0],"Minnesota":[74,25,33.8],"Alaska Anchorage":[32,4,12.5],"LIU":[22,0,0.0],"Lake Superior State":[5,0,0.0],"Michigan":[70,15,21.4],"Michigan Tech":[6,3,50.0],"Minnesota State":[14,4,28.6],"Michigan State":[74,22,29.7],"Ohio State":[97,18,18.6],"St. Cloud State":[8,4,50.0],"Minnesota Duluth":[14,2,14.3],"Penn State":[61,9,14.8],"Lindenwood":[27,3,11.1],"Notre Dame":[49,13,26.5],"Augustana":[8,0,0.0],"Bemidji State":[5,1,20.0]},"Notre Dame":{"Boston College":[5,2,40.0],"Denver":[5,2,40.0],"Quinnipiac":[7,1,14.3],"Minnesota":[52,11,21.2],"Boston University":[17,2,11.8],"Michigan":[28,13,46.4],"Michigan Tech":[5,0,0.0],"Wisconsin":[54,14,25.9]},"Alaska Anchorage":{"Bentley":[14,2,14.3],"Colorado College":[22,8,36.4],"Denver":[33,13,39.4],"Providence":[12,2,16.7],"Bemidji State":[12,2,16.7],"LIU":[36,14,38.9],"St. Cloud State":[10,5,50.0],"Stonehill":[22,0,0.0],"Alaska Fairbanks":[98,28,28.6],"Wisconsin":[44,12,27.3],"Augustana":[10,5,50.0],"Lake Superior State":[38,8,21.1],"Mercyhurst":[10,0,0.0],"Miami (OH)":[18,4,22.2],"Northeastern":[6,2,33.3],"Northern Michigan":[31,6,19.4],"Western Michigan":[28,10,35.7],"Air Force":[13,3,23.1],"Arizona State":[38,15,39.5],"Penn State":[6,2,33.3],"Robert Morris":[12,2,16.7],"UMass Lowell":[11,0,0.0],"UConn":[6,3,50.0],"Maine":[15,1,6.7],"Simon Fraser":[10,0,0.0],"Bowling Green":[15,5,33.3],"Ferris State":[8,2,25.0],"Michigan Tech":[11,3,27.3],"Omaha":[9,3,33.3]},"Alaska Fairbanks":{"Clarkson":[17,1,5.9],"Colgate":[9,6,66.7],"Cornell":[15,3,20.0],"Denver":[37,11,29.7],"North Dakota":[9,3,33.3],"Providence":[11,2,18.2],"Quinnipiac":[7,1,14.3],"Minnesota":[13,0,0.0],"Princeton":[5,1,20.0],"Alaska Anchorage":[111,21,18.9],"LIU":[46,13,28.3],"Michigan Tech":[19,3,15.8],"Northern Michigan":[7,2,28.6],"RPI":[17,1,5.9],"Stonehill":[6,1,16.7],"St. Cloud State":[7,1,14.3],"Minnesota Duluth":[14,1,7.1],"Union":[11,2,18.2],"Wisconsin":[8,4,50.0]},"Arizona State":{"Colgate":[46,7,15.2],"Colorado College":[19,1,5.3],"Clarkson":[5,0,0.0],"Cornell":[7,0,0.0],"Dartmouth":[12,1,8.3],"Denver":[64,20,31.2],"North Dakota":[27,6,22.2],"Providence":[5,0,0.0],"Quinnipiac":[8,3,37.5],"Minnesota":[6,1,16.7],"Alaska Anchorage":[34,1,2.9],"LIU":[52,12,23.1],"Michigan":[5,0,0.0],"Miami (OH)":[25,2,8.0],"Michigan Tech":[7,2,28.6],"Minnesota State":[8,3,37.5],"Northern Michigan":[10,2,20.0],"Omaha":[24,6,25.0],"RIT":[11,0,0.0],"Robert Morris":[18,5,27.8],"Stonehill":[9,2,22.2],"Minnesota Duluth":[17,6,35.3],"Western Michigan":[14,5,35.7]},"Lindenwood":{"Denver":[11,5,45.5],"North Dakota":[7,3,42.9],"Army West Point":[10,2,20.0],"Maine":[6,2,33.3],"Minnesota":[6,2,33.3],"LIU":[13,5,38.5],"Lake Superior State":[9,1,11.1],"Michigan":[21,10,47.6],"Miami (OH)":[5,2,40.0],"Michigan State":[6,1,16.7],"Ohio State":[10,2,20.0],"Omaha":[7,1,14.3],"Stonehill":[18,2,11.1],"Vermont":[9,2,22.2],"Wisconsin":[37,9,24.3],"Western Michigan":[13,6,46.2]},"LIU":{"AIC":[14,2,14.3],"Bentley":[8,0,0.0],"Colgate":[35,8,22.9],"Providence":[12,2,16.7],"Army West Point":[8,2,25.0],"Quinnipiac":[30,13,43.3],"Canisius":[12,4,33.3],"Holy Cross":[16,4,25.0],"Minnesota":[20,4,20.0],"Princeton":[33,4,12.1],"Alaska Anchorage":[62,16,25.8],"ALA":[10,4,40.0],"Boston University":[10,4,40.0],"Alaska Fairbanks":[60,14,23.3],"Arizona State":[35,10,28.6],"Mercyhurst":[12,4,33.3],"New Hampshire":[7,2,28.6],"Penn State":[23,10,43.5],"Robert Morris":[21,6,28.6],"Sacred Heart":[10,2,20.0],"Stonehill":[144,24,16.7],"UConn":[10,3,30.0],"Lindenwood":[10,1,10.0],"North Dakota":[9,3,33.3],"St. Thomas":[13,1,7.7],"Vermont":[38,10,26.3],"Wisconsin":[26,4,15.4],"Brown":[16,6,37.5],"Omaha":[38,19,50.0],"Yale":[10,6,60.0],"Minnesota State":[9,4,44.4],"Northeastern":[28,4,14.3],"Ohio State":[15,4,26.7],"Miami (OH)":[10,4,40.0],"RPI":[10,6,60.0],"UMass Lowell":[8,4,50.0]},"Simon Fraser":{"Alaska Anchorage":[10,1,10.0],"Boston University":[12,1,8.3],"Lake Superior State":[6,0,0.0],"Michigan":[6,1,16.7],"St. Lawrence":[5,0,0.0],"Stonehill":[6,2,33.3]},"Augustana":{"Bowling Green":[18,1,5.6],"Colgate":[8,1,12.5],"Alaska Anchorage":[6,1,16.7],"LIU":[5,0,0.0],"Lake Superior State":[16,4,25.0],"Michigan Tech":[13,2,15.4],"Minnesota State":[20,3,15.0],"Northern Michigan":[10,0,0.0],"Omaha":[16,3,18.8],"Minnesota Duluth":[5,1,20.0],"Wisconsin":[11,0,0.0]},"ALA":{"LIU":[18,2,11.1],"Union":[6,2,33.3]},"U.S. National Under-18 Team":{"Cornell":[12,4,33.3],"North Dakota":[5,3,60.0],"Boston University":[14,1,7.1],"Niagara":[5,1,20.0]}};
+var CONF={"Air Force":"Atlantic Hockey","AIC":"Atlantic Hockey","Army West Point":"Atlantic Hockey","Bentley":"Atlantic Hockey","Canisius":"Atlantic Hockey","Holy Cross":"Atlantic Hockey","Mercyhurst":"Atlantic Hockey","Niagara":"Atlantic Hockey","RIT":"Atlantic Hockey","Robert Morris":"Atlantic Hockey","Sacred Heart":"Atlantic Hockey","Stonehill":"Atlantic Hockey","Boston College":"Hockey East","Boston University":"Hockey East","UConn":"Hockey East","Maine":"Hockey East","UMass Lowell":"Hockey East","Merrimack":"Hockey East","New Hampshire":"Hockey East","Northeastern":"Hockey East","Providence":"Hockey East","Vermont":"Hockey East","Massachusetts":"Hockey East","Brown":"ECAC","Clarkson":"ECAC","Colgate":"ECAC","Cornell":"ECAC","Dartmouth":"ECAC","Harvard":"ECAC","Princeton":"ECAC","Quinnipiac":"ECAC","RPI":"ECAC","St. Lawrence":"ECAC","Union":"ECAC","Yale":"ECAC","Bowling Green":"CCHA","Ferris State":"CCHA","Lake Superior State":"CCHA","Michigan Tech":"CCHA","Minnesota State":"CCHA","Northern Michigan":"CCHA","St. Thomas":"CCHA","Bemidji State":"CCHA","Colorado College":"NCHC","Denver":"NCHC","Miami (OH)":"NCHC","Minnesota Duluth":"NCHC","North Dakota":"NCHC","Omaha":"NCHC","St. Cloud State":"NCHC","Western Michigan":"NCHC","Michigan":"Big Ten","Michigan State":"Big Ten","Minnesota":"Big Ten","Ohio State":"Big Ten","Penn State":"Big Ten","Wisconsin":"Big Ten","Notre Dame":"Big Ten","Alaska Anchorage":"Independent","Alaska Fairbanks":"Independent","Arizona State":"Independent","Lindenwood":"Independent","LIU":"Independent","Simon Fraser":"Independent","Augustana":"Independent","ALA":"Independent"};
+
+var INSIGHTS=[
+{t:"Danger Zone: Trailing by 2 in the 2nd",b:"When trailing by 2+ in the 2nd period, PK concedes at 25.9%. Desperation penalties taken while chasing the game are the costliest for any program."},
+{t:"5-Minute Majors: Nearly Double the Risk",b:"Major penalties convert at 37.0% vs 20.0% for minors. A single major is statistically worth nearly two goals against over a season. Discipline on physical plays is paramount."},
+{t:"Late 3rd + Trailing = Maximum Danger",b:"3rd period penalties when down 1 convert at 24.0%, and when down 2+ at 22.5%. Teams protecting a lead draw penalties against desperate opponents who concede at elevated rates."},
+{t:"Contact Penalties Are the Costliest",b:"Head contact (34.7%), face masking (34.3%), and kneeing (27.7%) all exceed the baseline by 6–14 points. These correlate with momentum swings that power plays exploit."},
+{t:"Leading Teams Kill Better",b:"When up 2+, GA rate drops to 18.4–18.5% — 2.5+ points below baseline. Pressure and game state matter as much as the infraction itself."},
+{t:"2nd Period Is the Most Dangerous",b:"Both 2nd-early (22.0%) and 2nd-late (21.7%) exceed the baseline. More penalties are called in the 2nd than any other period, and they convert at the highest rates."}
+];
+
+var MIN_SAMPLE=50;
+var tip=document.getElementById('tip');
+window.showTip=function(e,html){tip.innerHTML=html;tip.classList.add('on');tip.style.left=Math.min(e.clientX+14,innerWidth-280)+'px';tip.style.top=Math.max(e.clientY-50,8)+'px';};
+window.hideTip=function(){tip.classList.remove('on');};
+function fmt(n){return n>=10000?(n/1000).toFixed(1)+'K':n.toLocaleString();}
+function barCol(v,bl){if(v>=bl+10)return'var(--hot)';if(v>=bl+4)return'var(--warm)';if(v>=bl)return'var(--accent)';return'var(--cool)';}
+function esc(s){return(s||'').replace(/'/g,'&#39;').replace(/"/g,'&quot;').replace(/</g,'&lt;');}
+
+document.getElementById('stats').innerHTML=[
+  [fmt(D.total_penalties),'Penalties'],[fmt(D.total_games),'Games'],[D.total_teams,'Programs'],[D.baseline+'%','Baseline GA Rate'],['8','Seasons']
+].map(function(s){return'<div class="st"><div class="st-n">'+s[0]+'</div><div class="st-l">'+s[1]+'</div></div>';}).join('');
+
+document.getElementById('color-legend').innerHTML=[
+  ['var(--hot)','High Risk (10+ above baseline)'],
+  ['var(--warm)','Elevated (4–10 above)'],
+  ['var(--accent)','Near Baseline'],
+  ['var(--cool)','Below Baseline']
+].map(function(l){return'<div class="legend-item"><div class="legend-dot" style="background:'+l[0]+'"></div>'+l[1]+'</div>';}).join('')+
+'<div class="legend-item"><div style="width:20px;height:0;border-top:2px dashed var(--bl);opacity:.5"></div><span style="font-size:10px;color:var(--ts);font-weight:600">Baseline ('+D.baseline+'%)</span></div>';
+
+var tabNames=['Penalty Risk','Game Situations','Cascade & Severity','Program Lookup','Conference & Discipline','Scouting Report','Risk Calculator','Situation Simulator','Season Trends','Upload CSV','Ask the Data','Glossary','Methodology'];
+document.getElementById('tabs').innerHTML=tabNames.map(function(n,i){return'<button class="tab'+(i===0?' on':'')+'" data-t="'+i+'">'+n+'</button>';}).join('');
+
+function hBar(data,maxV,baseline,opts){
+  opts=opts||{};
+  var scale=maxV*1.25;
+  var blPct=baseline?(baseline/scale*100):0;
+  return'<div class="bc">'+data.map(function(d){
+    var pct=Math.min(d[1]/scale*100,100).toFixed(1);
+    var col=barCol(d[1],baseline||0);
+    var small=opts.flagSmall&&d[3]&&d[3]<MIN_SAMPLE;
+    var cls=small?'br br-small':'br';
+    var badge=small?'<span class="br-badge">n='+d[3]+'</span>':'';
+    return'<div class="'+cls+'" onmouseenter="showTip(event,\'<b>'+esc(d[0])+'</b>'+esc(d[2])+'\')" onmouseleave="hideTip()">'+
+      '<div class="br-l">'+d[0]+'</div>'+
+      '<div class="br-t">'+(baseline?'<div class="bl" style="left:'+blPct+'%"></div>':'')+
+      badge+'<div class="br-f" style="width:'+pct+'%;background:'+col+';opacity:.85"></div></div>'+
+      '<div class="br-v">'+d[1]+'%</div></div>';
+  }).join('')+'</div>';
+}
+
+function vBar(data,maxV,baseline,colorFn){
+  var scale=maxV*1.2;
+  var blPct=baseline?((baseline/scale)*100).toFixed(1):0;
+  return'<div class="vbc">'+(baseline?'<div class="vbc-bl" data-label="'+baseline+'% baseline" style="bottom:'+blPct+'%"></div>':'')+
+    data.map(function(d){
+      var pct=Math.min(d[1]/scale*100,100).toFixed(1);
+      var col=colorFn?colorFn(d[1]):'var(--accent)';
+      return'<div class="vb"><div class="vb-v">'+d[1]+'%</div><div class="vb-f" style="height:'+pct+'%;background:'+col+';opacity:.85" onmouseenter="showTip(event,\'<b>'+esc(d[0])+'</b>'+esc(d[2])+'\')" onmouseleave="hideTip()"></div><div class="vb-l">'+d[0]+'</div></div>';
+    }).join('')+'</div>';
+}
+
+function pane0(){
+  var reliable=D.off.filter(function(o){return o[2]>=MIN_SAMPLE;});
+  var small=D.off.filter(function(o){return o[2]<MIN_SAMPLE&&o[2]>=10;}).slice(0,5);
+  var all=reliable.concat(small);
+  var clean=all.map(function(o){return[o[0],o[3],'\n'+o[3]+'% GA rate\n'+o[1]+' goals on '+fmt(o[2])+' penalties'+(o[2]<MIN_SAMPLE?' (small sample, n='+o[2]+')':''),o[2]];});
+  var durBars=D.dur.map(function(d){return[d[0],d[3],'\n'+d[3]+'% GA rate\n'+d[2]+' goals on '+fmt(d[1])+' penalties'];});
+  return'<div class="cd"><h2>Which Penalties Hurt Your Team Most?</h2>'+
+    '<div class="cd-d">GA rate by offense type. Solid bars have n≥50 penalties (statistically reliable). Faded bars are small samples — interpret with caution. The dashed white line is the D1 baseline ('+D.baseline+'%). Offenses right of it hurt more than average.</div>'+
+    hBar(clean,50,D.baseline,{flagSmall:true})+'</div>'+
+    '<div class="cd"><h2>Penalty Severity Matters</h2>'+
+    '<div class="cd-d">A 5-minute major converts at 37% — nearly double the 20% rate for a standard minor. Keeping your players out of the box on physical plays protects your PK unit.</div>'+
+    hBar(durBars,45,D.baseline)+'</div>';
+}
+
+function pane1(){
+  var ptBars=D.pt.map(function(d){return[d[0],d[3],'\n'+d[3]+'% GA rate\n'+d[2]+' goals on '+fmt(d[1])+' penalties'];});
+  var sdBars=D.sd.map(function(d){return[d[0],d[3],'\n'+d[3]+'% GA rate\n'+d[2]+' goals on '+fmt(d[1])+' penalties'];});
+  var ptMax=Math.max.apply(null,D.pt.map(function(d){return d[3];}));
+  var sdMax=Math.max.apply(null,D.sd.map(function(d){return d[3];}));
+  var periods=['1st','2nd','3rd'],diffs=['Down 2+','Down 1','Tied','Up 1','Up 2+'];
+  var hmHtml='<div class="hm"><div class="hm-h"></div>'+diffs.map(function(d){return'<div class="hm-h">'+d+'</div>';}).join('');
+  periods.forEach(function(p){
+    hmHtml+='<div class="hm-r">'+p+'</div>';
+    diffs.forEach(function(df){
+      var c=D.hm.find(function(x){return x[0]===p&&x[1]===df;});
+      if(c){
+        var rate=c[2],n=c[3];
+        var t=Math.max(0,Math.min(1,(rate-16)/(28-16)));
+        var bg,fg;
+        if(rate>=24){bg='rgba(232,89,79,.28)';fg='var(--hot)';}
+        else if(rate>=22){bg='rgba(224,152,56,.22)';fg='var(--warm)';}
+        else if(rate>=D.baseline){bg='rgba(59,139,235,.18)';fg='var(--accent)';}
+        else if(rate>=19){bg='rgba(47,191,139,.14)';fg='var(--cool)';}
+        else{bg='rgba(47,191,139,.22)';fg='var(--cool)';}
+        hmHtml+='<div class="hm-c" style="background:'+bg+';color:'+fg+';border:1px solid var(--border)" onmouseenter="showTip(event,\'<b>'+p+' period, '+df+'</b>\nGA Rate: '+rate+'%\nSample: '+fmt(n)+' penalties\n'+(rate>D.baseline?'Above':'Below')+' baseline by '+(Math.abs(rate-D.baseline)).toFixed(1)+' pts\')" onmouseleave="hideTip()">'+rate+'%<small style="color:var(--tm)">n='+fmt(n)+'</small></div>';
+      }else hmHtml+='<div class="hm-c" style="background:var(--sr);color:var(--tm)">--</div>';
+    });
+  });
+  hmHtml+='</div>';
+  return'<div class="g2">'+
+    '<div class="cd"><h2>When Penalties Hurt Most</h2>'+
+    '<div class="cd-d">Early = first 10 min, Late = last 10 min of each period. The 2nd period is the most dangerous window for PK units.</div>'+
+    vBar(ptBars,ptMax,D.baseline,function(v){return v>D.baseline?'var(--warm)':'var(--cool)';})+'</div>'+
+    '<div class="cd"><h2>Score State Matters</h2>'+
+    '<div class="cd-d">From the penalized team\'s perspective. Trailing by 2 is the worst time to take a penalty (25.2%).</div>'+
+    vBar(sdBars,sdMax,D.baseline,function(v){return v>D.baseline+3?'var(--hot)':v>D.baseline?'var(--warm)':'var(--cool)';})+'</div></div>'+
+    '<div class="cd"><h2>The Full Picture: Period x Score State</h2>'+
+    '<div class="cd-d">Every intersection of period and score state. Red cells = danger zones (24%+), orange = elevated risk, blue = below baseline. Hover for detail.</div>'+hmHtml+'</div>';
+}
+
+function paneCascade(){
+  var casBars=CASCADE.map(function(d){return[d[0],d[3],'\n'+d[3]+'% GA rate\n'+fmt(d[2])+' goals on '+fmt(d[1])+' penalties'];});
+  var casMax=Math.max.apply(null,CASCADE.map(function(d){return d[3];}));
+
+  var sevHtml='<div class="hm" style="grid-template-columns:72px repeat(3,1fr);max-width:480px"><div class="hm-h"></div><div class="hm-h">1st Period</div><div class="hm-h">2nd Period</div><div class="hm-h">3rd Period</div>';
+  ['Minor','Major'].forEach(function(sev){
+    sevHtml+='<div class="hm-r">'+sev+'</div>';
+    ['1st','2nd','3rd'].forEach(function(per){
+      var c=SEV_PER.find(function(x){return x[0]===sev&&x[1]===per;});
+      if(c){
+        var rate=c[4],n=c[2];
+        var bg,fg;
+        if(rate>=35){bg='rgba(232,89,79,.28)';fg='var(--hot)';}
+        else if(rate>=25){bg='rgba(224,152,56,.22)';fg='var(--warm)';}
+        else if(rate>=D.baseline){bg='rgba(59,139,235,.18)';fg='var(--accent)';}
+        else{bg='rgba(47,191,139,.14)';fg='var(--cool)';}
+        sevHtml+='<div class="hm-c" style="background:'+bg+';color:'+fg+';border:1px solid var(--border)" onmouseenter="showTip(event,\'<b>'+sev+' — '+per+' period</b>\nGA Rate: '+rate+'%\nSample: '+fmt(n)+' penalties\')" onmouseleave="hideTip()">'+rate+'%<small style="color:var(--tm)">n='+fmt(n)+'</small></div>';
+      }else sevHtml+='<div class="hm-c" style="background:var(--sr);color:var(--tm)">--</div>';
+    });
+  });
+  sevHtml+='</div>';
+
+  var totalCas=CASCADE.reduce(function(s,d){return s+d[1];},0);
+  var drift=(CASCADE[4][3]-CASCADE[0][3]).toFixed(1);
+
+  return'<div class="g2">'+
+    '<div class="cd"><h2>Penalty Cascade Effect</h2>'+
+    '<div class="cd-d">Does the GA rate climb as a team takes more penalties in a single game? Research on fatigue and PK degradation suggests yes — this data confirms a +'+drift+' percentage point drift from the 1st penalty to the 5th+ in a game (n='+fmt(totalCas)+').</div>'+
+    vBar(casBars,casMax+1,D.baseline,function(v){return v>D.baseline?'var(--warm)':'var(--cool)';})+'</div>'+
+    '<div class="cd"><h2>Severity x Period Interaction</h2>'+
+    '<div class="cd-d">Majors are far more dangerous than minors in every period — but the gap narrows as the game progresses. A 1st-period major converts at 40.1% vs 35.0% in the 3rd. Minor penalties peak at 20.9% in the 2nd period.</div>'+
+    sevHtml+'</div></div>'+
+    '<div class="cd"><h2>Coaching Insight: The Cascade</h2>'+
+    '<div class="cd-d" style="margin-bottom:0">The first penalty of a game converts at 20.7% — essentially baseline. But by the 5th penalty, the rate climbs to 22.2%. That 1.5-point drift means a team averaging 5+ penalties per game gives up roughly 1 extra goal every 67 penalty kills compared to disciplined teams. For a high-penalty team over 34 games, that is <b>'+(0.015*5*34).toFixed(0)+' additional goals</b> per season from cascade fatigue alone. Prevention compounds: staying out of the box early protects your PK unit for the entire game.</div></div>';
+}
+
+function paneConf(){
+  var sorted=CONF_DATA.slice().sort(function(a,b){return a[5]-b[5];});
+  var confMax=Math.max.apply(null,sorted.map(function(d){return d[5];}));
+  var confBars=sorted.map(function(d){return[d[0]+' ('+d[1]+')',d[5],'\n'+d[5]+'% GA rate\n'+fmt(d[3])+' goals on '+fmt(d[2])+' penalties\n'+d[1]+' teams | '+d[4]+' pen/g'];});
+
+  var discTop=DISC.slice(0,10);
+  var discBot=DISC.slice(-10).reverse();
+  var discMax=Math.max.apply(null,DISC.map(function(d){return d[3];}));
+
+  var discHtml='<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">'+
+    '<div><h3 style="font-family:var(--fd);font-size:14px;color:var(--cool);letter-spacing:.04em;text-transform:uppercase;margin-bottom:10px">Most Disciplined</h3>';
+  discTop.forEach(function(d,i){
+    var w=Math.max(d[3]/discMax*100,2).toFixed(0);
+    var col=d[3]<40?'var(--cool)':d[3]<55?'var(--accent)':'var(--warm)';
+    discHtml+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;font-size:11px" onmouseenter="showTip(event,\'<b>'+esc(d[0])+'</b>\nPenalties/Game: '+d[1]+'\nGA Rate: '+d[2]+'%\nDiscipline Index: '+d[3]+'\')" onmouseleave="hideTip()">'+
+      '<span style="width:18px;text-align:right;color:var(--tm);font-size:10px">'+(i+1)+'.</span>'+
+      '<span style="width:100px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ts)">'+esc(d[0])+'</span>'+
+      '<div style="flex:1;height:14px;background:var(--sr);border-radius:4px;overflow:hidden"><div style="height:100%;width:'+w+'%;background:'+col+';border-radius:4px"></div></div>'+
+      '<span style="width:32px;text-align:right;font-weight:600;color:var(--ts);font-family:var(--fm)">'+d[3]+'</span></div>';
+  });
+  discHtml+='</div><div><h3 style="font-family:var(--fd);font-size:14px;color:var(--hot);letter-spacing:.04em;text-transform:uppercase;margin-bottom:10px">Least Disciplined</h3>';
+  discBot.forEach(function(d,i){
+    var w=Math.max(d[3]/discMax*100,2).toFixed(0);
+    var col=d[3]<40?'var(--cool)':d[3]<55?'var(--accent)':'var(--warm)';
+    discHtml+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;font-size:11px" onmouseenter="showTip(event,\'<b>'+esc(d[0])+'</b>\nPenalties/Game: '+d[1]+'\nGA Rate: '+d[2]+'%\nDiscipline Index: '+d[3]+'\')" onmouseleave="hideTip()">'+
+      '<span style="width:18px;text-align:right;color:var(--tm);font-size:10px">'+(DISC.length-9+i)+'.</span>'+
+      '<span style="width:100px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ts)">'+esc(d[0])+'</span>'+
+      '<div style="flex:1;height:14px;background:var(--sr);border-radius:4px;overflow:hidden"><div style="height:100%;width:'+w+'%;background:'+col+';border-radius:4px"></div></div>'+
+      '<span style="width:32px;text-align:right;font-weight:600;color:var(--ts);font-family:var(--fm)">'+d[3]+'</span></div>';
+  });
+  discHtml+='</div></div>';
+
+  return'<div class="cd"><h2>Conference Comparison</h2>'+
+    '<div class="cd-d">GA rate across the 6 D1 conferences plus independents. Sorted from best (lowest GA rate) to worst. Conference number in parentheses = member count.</div>'+
+    hBar(confBars,confMax+2,D.baseline)+'</div>'+
+    '<div class="cd"><h2>Discipline Index</h2>'+
+    '<div class="cd-d">A composite ranking combining penalty frequency (PPG, 60% weight) and penalty-kill effectiveness (GA rate, 40% weight). Lower = better disciplined and more effective on the PK. Normalized 0–100 scale across all '+DISC.length+' programs with 10+ games. Hover for detail.</div>'+
+    discHtml+'</div>'+
+    '<div class="cd"><h2>How the Discipline Index Works</h2>'+
+    '<div class="cd-d" style="margin-bottom:0">'+
+    '<b>Formula:</b> Discipline Index = (PPG_normalized × 0.60) + (GA_Rate_normalized × 0.40)<br><br>'+
+    'Each component is min-max scaled to 0–100 across all D1 programs. PPG gets 60% weight because penalty avoidance is entirely within coaching control. GA rate gets 40% because it reflects PK unit quality but is partially influenced by opponent PP strength and puck luck.<br><br>'+
+    '<b>Interpretation:</b> A score under 30 indicates strong discipline and a reliable PK. Scores above 60 signal both a penalty-prone roster and a leaky kill — a compound risk that can cost 8–12 additional goals per season compared to elite programs.</div></div>';
+}
+
+var tmSortCol=4,tmSortAsc=false,tmFilterConf='All';
+function buildTmRows(teams){
+  var mx=Math.max.apply(null,teams.map(function(t){return t[3];}));
+  return teams.map(function(t,i){
+    var ga=t[4]!=null?t[4]+'%':'--';
+    var bw=(t[3]/mx*100).toFixed(0);
+    var gaCol=t[4]!=null?barCol(t[4],D.baseline):'';
+    var conf=CONF[t[0]]||'Independent';
+    return'<tr data-name="'+esc(t[0]).toLowerCase()+'" data-conf="'+conf+'" onmouseenter="showTip(event,\'<b>'+esc(t[0])+'</b>\n'+conf+'\n'+t[1]+' penalties across '+t[2]+' games\n'+t[3]+' per game | GA rate: '+ga+'\')" onmouseleave="hideTip()">'+
+      '<td class="r">'+(i+1)+'</td><td class="nm">'+esc(t[0])+'</td><td class="r" style="color:var(--tm);font-size:10px">'+conf+'</td><td class="r">'+t[2]+'</td><td class="r">'+fmt(t[1])+'</td>'+
+      '<td><div class="bf"><div class="bf-f" style="width:'+bw+'%"></div><div class="bf-l">'+t[3]+'/g</div></div></td>'+
+      '<td class="r" style="color:'+gaCol+'">'+ga+'</td></tr>';
+  }).join('');
+}
+
+function sortTeams(){
+  var sorted=D.tm_all.slice();
+  var col=tmSortCol,asc=tmSortAsc;
+  sorted.sort(function(a,b){
+    var av=col===0?a[0]:col===1?(CONF[a[0]]||'Z'):col===2?a[2]:col===3?a[1]:col===4?a[3]:a[4]||0;
+    var bv=col===0?b[0]:col===1?(CONF[b[0]]||'Z'):col===2?b[2]:col===3?b[1]:col===4?b[3]:b[4]||0;
+    if(typeof av==='string')return asc?av.localeCompare(bv):bv.localeCompare(av);
+    return asc?av-bv:bv-av;
+  });
+  if(tmFilterConf!=='All')sorted=sorted.filter(function(t){return(CONF[t[0]]||'Independent')===tmFilterConf;});
+  var body=document.getElementById('tm-body');
+  if(body)body.innerHTML=buildTmRows(sorted);
+  document.querySelectorAll('#tm-thead th').forEach(function(th,i){
+    th.classList.toggle('sorted',i===tmSortCol);
+    var arr=th.querySelector('.sort-arrow');
+    if(arr)arr.textContent=i===tmSortCol?(tmSortAsc?'▲':'▼'):'▼';
+  });
+}
+
+function pane2(){
+  var confs=Object.keys(CONF).reduce(function(a,k){var c=CONF[k];if(a.indexOf(c)<0)a.push(c);return a;},[]).sort();
+  confs.unshift('All');
+  var optHtml=confs.map(function(c){return'<option value="'+c+'">'+c+'</option>';}).join('');
+  return'<div class="cd"><h2>Program Discipline Rankings</h2>'+
+    '<div class="cd-d">All '+D.tm_all.length+' programs with 10+ games. Click any column header to sort. Filter by conference. Export to CSV for your own analysis.</div>'+
+    '<div class="search">'+
+    '<input id="tm-search" placeholder="Search any program..." oninput="filterTeams()">'+
+    '<select id="conf-filter" onchange="onConfFilter(this.value)">'+optHtml+'</select>'+
+    '<button class="export-btn" onclick="exportCSV()">Export CSV</button>'+
+    '</div>'+
+    '<div style="overflow-x:auto;max-height:600px;overflow-y:auto"><table class="tbl"><thead id="tm-thead"><tr>'+
+    '<th style="width:32px">#</th>'+
+    '<th onclick="sortCol(0)">Program <span class="sort-arrow">▼</span></th>'+
+    '<th onclick="sortCol(1)">Conf <span class="sort-arrow">▼</span></th>'+
+    '<th class="r" onclick="sortCol(2)">Games <span class="sort-arrow">▼</span></th>'+
+    '<th class="r" onclick="sortCol(3)">Penalties <span class="sort-arrow">▼</span></th>'+
+    '<th style="min-width:90px" onclick="sortCol(4)" class="sorted">Per Game <span class="sort-arrow">▼</span></th>'+
+    '<th class="r" onclick="sortCol(5)">GA Rate <span class="sort-arrow">▼</span></th>'+
+    '</tr></thead><tbody id="tm-body">'+buildTmRows(D.tm_all)+'</tbody></table></div></div>';
+}
+
+window.sortCol=function(col){
+  if(tmSortCol===col)tmSortAsc=!tmSortAsc;
+  else{tmSortCol=col;tmSortAsc=col===0||col===1;}
+  sortTeams();
+};
+window.onConfFilter=function(v){tmFilterConf=v;sortTeams();filterTeams();};
+window.filterTeams=function(){
+  var q=(document.getElementById('tm-search')||{}).value||'';
+  q=q.toLowerCase();
+  document.querySelectorAll('#tm-body tr').forEach(function(r){
+    var name=r.getAttribute('data-name')||'';
+    var conf=r.getAttribute('data-conf')||'';
+    var matchName=!q||name.indexOf(q)>=0;
+    var matchConf=tmFilterConf==='All'||conf===tmFilterConf;
+    r.style.display=(matchName&&matchConf)?'':'none';
+  });
+};
+window.exportCSV=function(){
+  var csv='Program,Conference,Games,Penalties,Per Game,GA Rate\n';
+  D.tm_all.forEach(function(t){
+    csv+='"'+t[0]+'","'+(CONF[t[0]]||'Independent')+'",'+t[2]+','+t[1]+','+t[3]+','+(t[4]||'')+'\n';
+  });
+  if(window.claude&&window.claude.use){
+    claude.use('downloads').then(function(dl){
+      if(dl){dl.save({filename:'ncaa_pk_rankings.csv',data:csv});}
+      else{dlFallback(csv);}
+    }).catch(function(){dlFallback(csv);});
+  }else{dlFallback(csv);}
+};
+function dlFallback(csv){
+  var blob=new Blob([csv],{type:'text/csv'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='ncaa_pk_rankings.csv';a.click();URL.revokeObjectURL(a.href);
+}
+
+function pane3(){
+  return'<div class="cd"><h2>Pre-Game Scouting Report</h2>'+
+    '<div class="cd-d">Type in your next opponent to get their penalty profile. See how they compare to the baseline and their conference peers. Identify coaching advantages before the game.</div>'+
+    '<div class="scout-input"><input id="scout-in" placeholder="Type opponent name (e.g. Boston College)..." oninput="scoutSearch(this.value)"><button onclick="runScout()">Scout</button></div>'+
+    '<div id="scout-suggest" style="display:none;margin:-12px 0 16px;background:var(--sr);border:1px solid var(--border);border-radius:8px;max-height:160px;overflow-y:auto"></div>'+
+    '<div id="scout-results"></div></div>';
+}
+
+window.scoutSearch=function(q){
+  var sg=document.getElementById('scout-suggest');
+  q=q.toLowerCase().trim();
+  if(!q){sg.style.display='none';return;}
+  var matches=D.tm_all.filter(function(t){return t[0].toLowerCase().indexOf(q)>=0;}).slice(0,6);
+  if(!matches.length){sg.style.display='none';return;}
+  sg.style.display='block';
+  sg.innerHTML=matches.map(function(t){
+    return'<div style="padding:8px 14px;cursor:pointer;font-size:12px;color:var(--ts);border-bottom:1px solid var(--border)" onmouseenter="this.style.background=\'var(--accentSoft)\'" onmouseleave="this.style.background=\'transparent\'" onclick="pickScout(\''+esc(t[0])+'\')">'+esc(t[0])+' <span style="color:var(--tm);font-size:10px">'+(CONF[t[0]]||'Independent')+' | '+t[3]+'/g</span></div>';
+  }).join('');
+};
+window.pickScout=function(name){
+  document.getElementById('scout-in').value=name;
+  document.getElementById('scout-suggest').style.display='none';
+  runScout();
+};
+window.runScout=function(){
+  var name=document.getElementById('scout-in').value.trim();
+  document.getElementById('scout-suggest').style.display='none';
+  var team=D.tm_all.find(function(t){return t[0].toLowerCase()===name.toLowerCase();});
+  if(!team){document.getElementById('scout-results').innerHTML='<div class="ins"><h4>Not Found</h4><p>No program matched "'+esc(name)+'". Try searching by full name (e.g. "Boston College" not "BC").</p></div>';return;}
+  var conf=CONF[team[0]]||'Independent';
+  var ppg=team[3],ga=team[4],pens=team[1],games=team[2];
+  var ppgRank=D.tm_all.filter(function(t){return t[3]>ppg;}).length+1;
+  var gaRank=D.tm_all.filter(function(t){return(t[4]||0)>ga;}).length+1;
+  var gaPerSeason=(ppg*(ga/100)*34).toFixed(1);
+  var confTeams=D.tm_all.filter(function(t){return(CONF[t[0]]||'Independent')===conf;});
+  var confAvgPpg=confTeams.length?+(confTeams.reduce(function(s,t){return s+t[3];},0)/confTeams.length).toFixed(1):0;
+  var confAvgGa=confTeams.length?+(confTeams.reduce(function(s,t){return s+(t[4]||0);},0)/confTeams.length).toFixed(1):0;
+
+  var html='<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">'+
+    '<div class="cd" style="margin-bottom:0"><h2 style="font-size:28px">'+esc(team[0])+'</h2><div class="cd-d" style="margin-bottom:12px">'+conf+' | '+games+' games | '+fmt(pens)+' penalties</div>'+
+    '<div class="risk-out" style="grid-template-columns:1fr 1fr;gap:12px">'+
+    '<div class="risk-box"><div class="risk-num" style="color:'+barCol(ppg*5,D.baseline)+'">'+ppg+'</div><div class="risk-label">Penalties/Game</div><div style="font-size:9px;color:var(--tm);margin-top:3px">Rank #'+ppgRank+' of '+D.tm_all.length+'</div></div>'+
+    '<div class="risk-box"><div class="risk-num" style="color:'+barCol(ga,D.baseline)+'">'+ga+'%</div><div class="risk-label">GA Rate</div><div style="font-size:9px;color:var(--tm);margin-top:3px">Rank #'+gaRank+' of '+D.tm_all.length+'</div></div>'+
+    '</div></div>'+
+    '<div class="cd" style="margin-bottom:0"><h2>vs Baseline &amp; Conference</h2><div class="cd-d" style="margin-bottom:12px">How this program compares to the D1 baseline and their '+conf+' peers.</div>'+
+    '<table class="tbl"><thead><tr><th>Metric</th><th class="r">'+esc(team[0])+'</th><th class="r">'+conf+'</th><th class="r">D1 Baseline</th></tr></thead><tbody>'+
+    '<tr><td>Penalties/Game</td><td class="r" style="font-weight:700;color:var(--text)">'+ppg+'</td><td class="r">'+confAvgPpg+'</td><td class="r">'+D.ppg_avg+'</td></tr>'+
+    '<tr><td>GA Rate</td><td class="r" style="font-weight:700;color:'+barCol(ga,D.baseline)+'">'+ga+'%</td><td class="r">'+confAvgGa+'%</td><td class="r">'+D.baseline+'%</td></tr>'+
+    '<tr><td>Est. PK Goals Against/Season</td><td class="r" style="font-weight:700;color:var(--text)">'+gaPerSeason+'</td><td class="r">'+(confAvgPpg*(confAvgGa/100)*34).toFixed(1)+'</td><td class="r">'+(D.ppg_avg*(D.baseline/100)*34).toFixed(1)+'</td></tr>'+
+    '</tbody></table></div></div>';
+
+  html+='<div class="cd"><h2>Coaching Takeaway</h2><div class="cd-d" style="margin-bottom:0">';
+  if(ppg>confAvgPpg+0.3)html+='This program takes penalties at a significantly higher rate than their '+conf+' peers ('+ppg+'/g vs '+confAvgPpg+'/g). ';
+  else if(ppg<confAvgPpg-0.3)html+='This program is well-disciplined relative to their '+conf+' peers ('+ppg+'/g vs '+confAvgPpg+'/g). ';
+  else html+='This program\'s penalty rate is in line with '+conf+' averages. ';
+
+  if(ga>D.baseline+3)html+='Their PK unit concedes at a notably elevated rate ('+ga+'% vs '+D.baseline+'% baseline) — they are vulnerable on the kill. Drawing penalties against them is high-value.';
+  else if(ga<D.baseline-3)html+='Their PK is strong ('+ga+'% vs '+D.baseline+'% baseline). Power plays against them convert at below-average rates. Focus on quality chances, not volume.';
+  else html+='Their PK effectiveness is near the D1 baseline ('+ga+'% vs '+D.baseline+'%).';
+
+  html+='</div></div>';
+  document.getElementById('scout-results').innerHTML=html;
+};
+
+function pane4(){
+  var tmOpts=D.tm_all.map(function(t){return'<option value="'+t[0]+'">'+t[0]+' ('+t[3]+'/g, '+(t[4]||'--')+'%)</option>';}).join('');
+  return'<div class="cd"><h2>Penalty Risk Calculator</h2>'+
+    '<div class="cd-d">How much do penalties cost your team over a season? Choose your program or set custom values. See the projected impact across best-case, baseline, and worst-case PK scenarios.</div>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">'+
+    '<div><label style="font-size:10px;font-weight:700;color:var(--tm);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px">Load a Program</label>'+
+    '<select id="risk-team" style="width:100%;padding:10px 12px;background:var(--sr);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:var(--fs);font-size:12px;outline:none;cursor:pointer" onchange="loadRiskTeam()">'+
+    '<option value="">Custom (use sliders)</option>'+tmOpts+'</select></div>'+
+    '<div><label style="font-size:10px;font-weight:700;color:var(--tm);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px">Games per Season</label>'+
+    '<input id="risk-games" type="number" value="34" min="1" max="60" style="width:100%;padding:10px 12px;background:var(--sr);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:var(--fm);font-size:12px;outline:none" oninput="calcRisk()"></div>'+
+    '</div>'+
+    '<div style="margin-top:8px"><div style="display:flex;justify-content:space-between;font-size:11px;color:var(--tm)"><span>Penalties/Game</span><span style="font-weight:700;color:var(--text)" id="risk-ppg-val">4.0/g</span></div>'+
+    '<input type="range" class="risk-slider" id="risk-ppg" min="2.5" max="6.5" step="0.1" value="4.0" oninput="calcRisk()">'+
+    '</div>'+
+    '<div style="margin-top:12px"><div style="display:flex;justify-content:space-between;font-size:11px;color:var(--tm)"><span>Your PK GA Rate</span><span style="font-weight:700;color:var(--text)" id="risk-ga-val">'+D.baseline+'%</span></div>'+
+    '<input type="range" class="risk-slider" id="risk-ga" min="12" max="30" step="0.5" value="'+D.baseline+'" oninput="calcRisk()">'+
+    '</div>'+
+    '<div class="risk-out" id="risk-output" style="grid-template-columns:repeat(4,1fr)"></div>'+
+    '<div class="cd" style="margin-top:20px;margin-bottom:0"><h2>What This Means</h2><div class="cd-d" style="margin-bottom:0" id="risk-narrative"></div></div>'+
+    '</div>';
+}
+
+window.loadRiskTeam=function(){
+  var sel=document.getElementById('risk-team');
+  if(!sel.value)return;
+  var tm=D.tm_all.find(function(t){return t[0]===sel.value;});
+  if(!tm)return;
+  document.getElementById('risk-ppg').value=tm[3];
+  document.getElementById('risk-ga').value=tm[4]||D.baseline;
+  calcRisk();
+};
+
+window.calcRisk=function(){
+  var ppg=parseFloat(document.getElementById('risk-ppg').value);
+  var gaRate=parseFloat(document.getElementById('risk-ga').value);
+  var gamesPerSeason=parseInt(document.getElementById('risk-games').value,10)||34;
+  document.getElementById('risk-ppg-val').textContent=ppg.toFixed(1)+'/g';
+  document.getElementById('risk-ga-val').textContent=gaRate.toFixed(1)+'%';
+  var totalPens=ppg*gamesPerSeason;
+  var gaYour=totalPens*(gaRate/100);
+  var gaBest=totalPens*(0.13);
+  var gaBaseline=totalPens*(D.baseline/100);
+  var gaWorst=totalPens*(0.27);
+  var out=document.getElementById('risk-output');
+  out.innerHTML=
+    '<div class="risk-box"><div class="risk-num" style="color:var(--cool)">'+gaBest.toFixed(0)+'</div><div class="risk-label">Elite PK (13%)</div><div style="font-size:9px;color:var(--tm);margin-top:3px">Quinnipiac-level</div></div>'+
+    '<div class="risk-box" style="border-color:var(--bl)"><div class="risk-num" style="color:var(--bl)">'+gaBaseline.toFixed(0)+'</div><div class="risk-label">Baseline ('+D.baseline+'%)</div><div style="font-size:9px;color:var(--tm);margin-top:3px">D1 average</div></div>'+
+    '<div class="risk-box" style="border-color:var(--accent)"><div class="risk-num" style="color:var(--accent)">'+gaYour.toFixed(0)+'</div><div class="risk-label">Your Rate ('+gaRate.toFixed(1)+'%)</div><div style="font-size:9px;color:var(--tm);margin-top:3px">Selected</div></div>'+
+    '<div class="risk-box"><div class="risk-num" style="color:var(--hot)">'+gaWorst.toFixed(0)+'</div><div class="risk-label">Weak PK (27%)</div><div style="font-size:9px;color:var(--tm);margin-top:3px">Bemidji St-level</div></div>';
+  var narrative=document.getElementById('risk-narrative');
+  var diff=(gaWorst-gaBest).toFixed(0);
+  var reduceSave=(0.5*gamesPerSeason*(gaRate/100)).toFixed(0);
+  var vsBl=(gaYour-gaBaseline).toFixed(0);
+  var vsDir=gaYour>gaBaseline?'more':'fewer';
+  narrative.innerHTML='At <b>'+ppg.toFixed(1)+' penalties per game</b> over a '+gamesPerSeason+'-game season, your team faces <b>'+totalPens.toFixed(0)+' penalty kills</b>. '+
+    'At your GA rate ('+gaRate.toFixed(1)+'%), that produces <b>'+gaYour.toFixed(0)+' goals against</b> — <b>'+Math.abs(+vsBl)+' '+vsDir+'</b> than the D1 baseline.'+
+    '<br><br>The gap between an elite PK (Quinnipiac, 13.9%) and the weakest (Bemidji State, 27.1%) is <b>'+diff+' goals</b> over a season. '+
+    'That is '+(diff/gamesPerSeason).toFixed(1)+' goals per game — often the difference between a win and a loss.'+
+    '<br><br><b>Discipline impact:</b> Reducing from '+ppg.toFixed(1)+' to '+(ppg-0.5).toFixed(1)+' penalties/game saves <b>~'+reduceSave+' goals</b> per season at your rate. '+
+    'Every penalty avoided is worth '+(gaRate/100).toFixed(2)+' expected goals against.';
+};
+
+function pane5(){
+  var seasons=D.sn;
+  var pts=seasons.map(function(s){return s[5];});
+  var yMin=Math.min.apply(null,pts)-2,yMax=Math.max.apply(null,pts)+2;
+  var w=100/pts.length;
+  var coords=pts.map(function(v,i){var x=w*i+w/2;var y=100-((v-yMin)/(yMax-yMin))*100;return[x,y];});
+  var svgPoly=coords.map(function(c){return c[0]+','+c[1];}).join(' ');
+  var svgArea=coords[0][0]+',100 '+svgPoly+' '+coords[coords.length-1][0]+',100';
+  var blY=100-((D.baseline-yMin)/(yMax-yMin))*100;
+  var dots=seasons.map(function(s,i){
+    var x=coords[i][0],y=coords[i][1];
+    return'<div style="position:absolute;left:'+x+'%;top:'+y+'%;transform:translate(-50%,-50%);z-index:3">'+
+      '<div style="width:10px;height:10px;border-radius:50%;background:var(--accent);border:2px solid var(--surface);cursor:default" onmouseenter="showTip(event,\'<b>'+s[0]+'</b>\n'+s[5]+'% GA rate\n'+fmt(s[4])+' goals / '+fmt(s[3])+' valid\n'+fmt(s[2])+' games\')" onmouseleave="hideTip()"></div>'+
+      '<div style="position:absolute;bottom:16px;left:50%;transform:translateX(-50%);font-size:10px;font-family:var(--fm);color:var(--ts);white-space:nowrap;font-weight:500">'+s[5]+'%</div></div>'+
+      '<div style="position:absolute;left:'+x+'%;bottom:-24px;transform:translateX(-50%);font-size:9px;color:var(--tm);font-weight:600">'+s[0]+'</div>';
+  }).join('');
+  var volBars=seasons.map(function(s){return[s[0],s[1],'\n'+fmt(s[1])+' penalties\n'+fmt(s[2])+' games'];});
+  var volMax=Math.max.apply(null,seasons.map(function(s){return s[1];}));
+  return'<div class="cd"><h2>How Has PK Risk Changed Over Time?</h2>'+
+    '<div class="cd-d">GA rate has remained remarkably stable around 20–21% since 2015. Note: Y-axis is zoomed to '+(yMin).toFixed(0)+'–'+(yMax).toFixed(0)+'% to show the narrow range of variation. This stability is a structural feature of the game, not a trend.</div>'+
+    '<div style="position:relative;height:250px;padding:24px 0 36px;">'+
+    '<svg style="position:absolute;inset:24px 0 36px;width:100%;height:calc(100% - 60px)" viewBox="0 0 100 100" preserveAspectRatio="none">'+
+    '<polygon points="'+svgArea+'" fill="var(--accent)" opacity="0.08"/>'+
+    '<polyline points="'+svgPoly+'" fill="none" stroke="var(--accent)" stroke-width="0.7" vector-effect="non-scaling-stroke" stroke-linejoin="round" opacity=".7"/>'+
+    '<line x1="0" y1="'+blY.toFixed(1)+'" x2="100" y2="'+blY.toFixed(1)+'" stroke="var(--bl)" stroke-width="0.5" stroke-dasharray="2,2" vector-effect="non-scaling-stroke" opacity="0.5"/>'+
+    '</svg>'+
+    ''+
+    dots+'</div></div>'+
+    '<div class="cd"><h2>Data Volume by Season</h2>'+
+    '<div class="cd-d">Total penalties logged per season. Full seasons (2021-22 through 2025-26) each have 15K–17K penalties. The three earlier seasons (2015-16, 2019-20, 2020-21) have partial data.</div>'+
+    vBar(volBars,volMax,null,function(){return'var(--accent)';})+'</div>';
+}
+
+function pane6(){
+  return'<div class="cd"><h2>Upload Your Team\'s Data</h2>'+
+    '<div class="cd-d">Drop a CSV with your penalty data to run the same analysis on your program. Required columns: <b>offense</b>, <b>goal_against</b> (0/1). Optional: period, duration, score_diff for deeper breakdowns. Everything stays in your browser — nothing is uploaded.</div>'+
+    '<div class="upload-zone" id="drop-zone">'+
+    '<input type="file" id="csv-file" accept=".csv">'+
+    '<div style="font-size:44px;margin-bottom:10px;opacity:.5">&#127954;</div>'+
+    '<p style="font-size:14px;font-weight:700;margin-bottom:6px;color:var(--text)">Drop CSV here or click to browse</p>'+
+    '<p style="color:var(--tm);font-size:11px">All processing happens locally. Nothing leaves your machine.</p>'+
+    '</div>'+
+    '<div id="upload-results"></div></div>';
+}
+
+function pane7(){
+  var fb=INSIGHTS.map(function(ins){return'<div class="ins"><h4>'+ins.t+'</h4><p>'+ins.b+'</p></div>';}).join('');
+  return'<div class="cd"><h2>Ask the Data</h2>'+
+    '<div class="cd-d">Ask questions about penalty-kill risk, game situations, or program comparisons. Works with the built-in knowledge base, or connect Gemini 2.0 Flash for live AI answers.</div>'+
+    '<div class="chat-box" id="chat-box">'+
+    '<div class="chat-msg ai">Ask me anything about penalty-kill risk — offense rankings, situational breakdowns, program comparisons, or coaching strategy.</div>'+
+    '</div>'+
+    '<div class="chat-quick" id="chat-quick">'+
+    '<button onclick="askQuick(\'Which offenses are most dangerous when trailing?\')">Trailing risk</button>'+
+    '<button onclick="askQuick(\'Compare major vs minor penalty risk\')">Major vs minor</button>'+
+    '<button onclick="askQuick(\'What should coaches focus on in the 2nd period?\')">2nd period focus</button>'+
+    '<button onclick="askQuick(\'Which programs have the best PK discipline?\')">Best discipline</button>'+
+    '<button onclick="askQuick(\'Compare Hockey East vs NCHC penalty rates\')">Conference compare</button>'+
+    '<button onclick="askQuick(\'What is the cost of one additional penalty per game over a season?\')">Season cost</button>'+
+    '</div>'+
+    '<div class="chat-input">'+
+    '<input id="chat-in" placeholder="e.g. Compare Boston College and Boston University PK stats...">'+
+    '<button id="chat-send">Ask</button>'+
+    '</div>'+
+    '<p id="ai-status" style="color:var(--tm);font-size:10px;margin-top:10px"></p>'+
+    '<div id="ai-fallback" style="margin-top:20px">'+
+    '<h3 style="font-family:var(--fd);font-size:17px;letter-spacing:.04em;text-transform:uppercase;margin-bottom:14px;color:var(--ts)">Key Coaching Insights</h3>'+
+    fb+'</div>'+
+    '<div class="ai-setup" id="ai-setup">'+
+    '<label>Connect AI (Optional)</label>'+
+    '<p style="font-size:10px;color:var(--tm);margin-bottom:10px;line-height:1.6">Paste a Gemini API key to enable live AI answers. Get a free key at <b>ai.google.dev</b>. Your key stays in your browser only.</p>'+
+    '<input id="gemini-key" type="password" placeholder="Paste your Gemini API key...">'+
+    '<button onclick="saveGeminiKey()">Connect</button>'+
+    '<div class="note" id="key-status"></div>'+
+    '</div></div>';
+}
+
+function pane8(){
+  return'<div class="cd"><h2>Data Glossary</h2>'+
+    '<div class="cd-d">Definitions for every metric and term used in this tool. Understanding these ensures accurate interpretation of the data.</div>'+
+    '<div class="gl-grid">'+
+    '<div class="gl-row"><div class="gl-term">GA Rate</div><div class="gl-def"><b>Goal-Against Rate.</b> The percentage of penalties that result in at least one power-play goal against the penalized team. Calculated as: (penalties with a goal against) ÷ (total valid penalties) × 100. This is the core metric of the tool.</div></div>'+
+    '<div class="gl-row"><div class="gl-term">Baseline</div><div class="gl-def">The D1 league-wide average GA rate across all 82,397 penalties: <b>'+D.baseline+'%</b>. Used as the reference line in all charts. Roughly one in five penalties results in a goal against.</div></div>'+
+    '<div class="gl-row"><div class="gl-term">Valid for Risk</div><div class="gl-def">The subset of penalties eligible for GA rate calculation: <b>'+fmt(D.valid_for_risk)+'</b> of '+fmt(D.total_penalties)+'. Excludes offsetting penalties (both teams penalized simultaneously), coincidental minors, and penalties where the power-play window cannot be determined.</div></div>'+
+    '<div class="gl-row"><div class="gl-term">PPG (Per Game)</div><div class="gl-def"><b>Penalties Per Game.</b> A program\'s total penalties divided by games played. The D1 average is '+D.ppg_avg+'/game. Higher = less disciplined.</div></div>'+
+    '<div class="gl-row"><div class="gl-term">Small Sample (n&lt;50)</div><div class="gl-def">Offenses with fewer than 50 occurrences across all 8 seasons. Their GA rates may be statistically unreliable. Shown faded in charts. Example: Embellishment has only 11 instances — its 45.5% GA rate is suggestive but not conclusive.</div></div>'+
+    '<div class="gl-row"><div class="gl-term">Score Differential</div><div class="gl-def">The penalized team\'s perspective at the time of the penalty. "Down 2" means the penalized team was trailing by 2 goals. Trailing teams concede at higher rates (up to 25.2%).</div></div>'+
+    '<div class="gl-row"><div class="gl-term">Period Timing</div><div class="gl-def">"Early" = first 10 minutes of a period. "Late" = last 10 minutes. This split captures whether fatigue and game flow affect PK conversion.</div></div>'+
+    '<div class="gl-row"><div class="gl-term">Major (5 min)</div><div class="gl-def">A 5-minute penalty that does not end when the opponent scores. Converts at 37.0% — nearly double the minor rate. Includes fighting, boarding resulting in injury, and other severe infractions.</div></div>'+
+    '<div class="gl-row"><div class="gl-term">Minor (2 min)</div><div class="gl-def">A standard 2-minute penalty that ends if the opponent scores a power-play goal. The most common type ('+fmt(D.dur[2][1])+' of '+fmt(D.valid_for_risk)+' valid). Converts at 20.0%.</div></div>'+
+    '<div class="gl-row"><div class="gl-term">Misconduct (10 min)</div><div class="gl-def">A 10-minute penalty. The team still plays 5-on-4 for 2 or 5 minutes depending on the accompanying minor/major. Converts at 35.8% because misconduct penalties often accompany aggressive play.</div></div>'+
+    '<div class="gl-row"><div class="gl-term">Heatmap Cell</div><div class="gl-def">Each cell in the Period x Score State heatmap shows the GA rate for that specific intersection. Darker red = higher risk. Sample size (n) shown in each cell — cells with small n are less reliable.</div></div>'+
+    '<div class="gl-row"><div class="gl-term">Est. PK GA/Season</div><div class="gl-def">Estimated penalty-kill goals against per season. Calculated as: (penalties/game) × (GA rate) × (games per season, default 34). A projection tool — actual results vary by opponent strength, special teams execution, and scheduling.</div></div>'+
+    '<div class="gl-row"><div class="gl-term">Conference</div><div class="gl-def">The NCAA D1 conference each program belongs to. Six conferences: Atlantic Hockey, Big Ten, CCHA, ECAC, Hockey East, NCHC. Programs not in a conference are listed as Independent.</div></div>'+
+    '<div class="gl-row"><div class="gl-term">Penalty Cascade</div><div class="gl-def"><b>Carry-Over Effect.</b> The observed increase in GA rate as a team takes additional penalties within a single game. The 1st penalty converts at 20.7%; by the 5th+ penalty, the rate climbs to 22.2%. Reflects PK unit fatigue and reduced lineup depth.</div></div>'+
+    '<div class="gl-row"><div class="gl-term">Severity x Period</div><div class="gl-def">A cross-tabulation of penalty type (Minor 2-min vs Major 5-min) and game period. Reveals interaction effects — for example, majors in the 1st period convert at 40.1% but drop to 35.0% in the 3rd, while minors peak in the 2nd period at 20.9%.</div></div>'+
+    '<div class="gl-row"><div class="gl-term">Discipline Index</div><div class="gl-def">A composite metric ranking programs on both penalty avoidance and PK effectiveness. Calculated as: (PPG_normalized × 0.60) + (GA_rate_normalized × 0.40), scaled 0–100. Lower = better. PPG weighted higher because penalty avoidance is entirely within coaching control.</div></div>'+
+    '</div></div>';
+}
+
+function pane9(){
+  return'<div class="cd"><h2>Methodology</h2>'+
+    '<div class="cd-d">Every number traces to a specific publicly posted box score.</div>'+
+    '<div class="mg">'+
+    '<div class="mc"><h4>Source</h4><p>Public box-score pages from 216 NCAA D1 men\'s ice hockey programs, normalized from 470 raw team name variants. Each penalty record parsed from the official page.</p></div>'+
+    '<div class="mc"><h4>Parser</h4><p>Template-agnostic column-header text matching. Handles multiple site templates (classic Sidearm and Vue-based). Validated across 53 sites.</p></div>'+
+    '<div class="mc"><h4>Verification</h4><p>Every parsed goal sequence is cross-checked against the page\'s official final score. Mismatches are excluded entirely.</p></div>'+
+    '<div class="mc"><h4>GA Matching</h4><p>Each penalty is matched to the power-play window it opened. Offsetting penalties are excluded from risk calculations.</p></div>'+
+    '<div class="mc"><h4>Privacy</h4><p>Only publicly posted team-level data. Player names are not surfaced in any visualization. No institutional or private data is used.</p></div>'+
+    '<div class="mc"><h4>Research</h4><p>This tool accompanies a first-author paper on penalty-kill decision support, under peer review at the Journal of Sports Analytics (SportRxiv DOI 10.51224/SRXIV.972).</p></div>'+
+    '</div></div>';
+}
+
+function paneSim(){
+var dims={per:'Any',score:'Any',sev:'Any',pnum:'Any'};
+var groups=[
+{id:'per',label:'Period',opts:['Any','1st','2nd','3rd']},
+{id:'score',label:'Score State',opts:['Any','Down 2+','Down 1','Tied','Up 1','Up 2+']},
+{id:'sev',label:'Severity',opts:['Any','Minor','Major']},
+{id:'pnum',label:'Penalty # in Game',opts:['Any','1st','2nd','3rd','4th','5th+']}
+];
+window._simDims=dims;
+window._simTeam='';
+var tmOpts=D.tm_all.map(function(t){return'<option value="'+esc(t[0])+'">'+esc(t[0])+' ('+(CONF[t[0]]||'Ind')+', '+t[3]+'/g, '+(t[4]||'--')+'%)</option>';}).join('');
+var html='<div class="cd"><h2>Game-State Penalty Situation Simulator</h2>'+
+'<div class="cd-d">Click any button to build a game situation. Watch the risk gauge react in real time. Based on '+D.valid_for_risk.toLocaleString()+' penalty kills across '+D.total_games.toLocaleString()+' games.</div>'+
+'<div style="margin-bottom:16px"><div style="font-size:10px;font-weight:700;color:var(--tm);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">Program Context (optional)</div>'+
+'<select id="sim-team" style="width:100%;max-width:360px;padding:8px 12px;background:var(--sr);border:1px solid var(--border);border-radius:20px;color:var(--text);font-family:var(--fs);font-size:12px;outline:none;cursor:pointer" onchange="simTeamPick(this.value)">'+
+'<option value="">All D1 (league-wide)</option>'+tmOpts+'</select></div>';
+groups.forEach(function(g){
+html+='<div style="margin-bottom:16px"><div style="font-size:10px;font-weight:700;color:var(--tm);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">'+g.label+'</div>'+
+'<div style="display:flex;gap:4px;flex-wrap:wrap">';
+g.opts.forEach(function(o){
+var isOn=dims[g.id]===o;
+html+='<button class="sim-btn'+(isOn?' sim-on':'')+'" data-dim="'+g.id+'" data-val="'+o+'" onclick="simPick(this)">'+o+'</button>';
+});
+html+='</div></div>';
+});
+html+='<div id="sim-result" style="margin-top:20px"></div></div>';
+return html;
+}
+window.simTeamPick=function(v){window._simTeam=v;runSim();};
+
+window.simPick=function(btn){
+var dim=btn.getAttribute('data-dim'),val=btn.getAttribute('data-val');
+window._simDims[dim]=val;
+btn.parentNode.querySelectorAll('.sim-btn').forEach(function(b){b.classList.remove('sim-on');});
+btn.classList.add('sim-on');
+runSim();
+};
+
+window.runSim=function(){
+var dims=window._simDims;if(!dims)return;
+var per=dims.per,score=dims.score,sev=dims.sev,pnum=dims.pnum;
+var key=per+'|'+score+'|'+sev+'|'+pnum;
+var d=SIM[key];
+var box=document.getElementById('sim-result');
+if(!d||d[0]<5){
+box.innerHTML='<div style="text-align:center;padding:32px;color:var(--ts)"><div style="font-size:32px;margin-bottom:8px;opacity:.3">?</div><div style="font-size:14px;font-weight:600">Insufficient Data</div><div style="font-size:12px;margin-top:4px">Fewer than 5 penalty kills match this combination. Try setting a dimension to "Any".</div></div>';
+return;
+}
+var d1Rate=d[2],n=d[0],ga=d[1];
+var selTeam=window._simTeam;
+var tmData=selTeam?D.tm_all.find(function(t){return t[0]===selTeam;}):null;
+var tmGa=tmData?(tmData[4]||0):0;
+var adjRate=tmData?d1Rate*(tmGa/D.baseline):0;
+var rate=tmData?adjRate:d1Rate;
+var diff=rate-D.baseline;
+var diffSign=diff>0?'+':'';
+
+var riskLvl,riskCol,riskBg;
+if(rate>=30){riskLvl='CRITICAL';riskCol='var(--hot)';riskBg='rgba(232,89,79,.18)';}
+else if(rate>=24){riskLvl='HIGH';riskCol='var(--hot)';riskBg='rgba(232,89,79,.12)';}
+else if(rate>=22){riskLvl='ELEVATED';riskCol='var(--warm)';riskBg='rgba(224,152,56,.14)';}
+else if(rate>=D.baseline){riskLvl='MODERATE';riskCol='var(--accent)';riskBg='rgba(59,139,235,.12)';}
+else if(rate>=18){riskLvl='BELOW AVG';riskCol='var(--cool)';riskBg='rgba(47,191,139,.12)';}
+else{riskLvl='LOW';riskCol='var(--cool)';riskBg='rgba(47,191,139,.18)';}
+
+var gaugeW=Math.min(rate/40*100,100).toFixed(1);
+var blW=(D.baseline/40*100).toFixed(1);
+
+var tags=[];
+if(per!=='Any')tags.push(per+' period');
+if(score!=='Any')tags.push(score);
+if(sev!=='Any')tags.push(sev.toLowerCase());
+if(pnum!=='Any')tags.push(pnum+' penalty');
+var situation=tags.length?tags.join(' / '):'all situations';
+
+var narrative='';
+var tmLabel=tmData?esc(tmData[0])+'\'s':'The';
+if(rate>=30)narrative=tmLabel+' PK concedes nearly 1 in 3 here. Deploy the top unit with aggressive clearing.';
+else if(rate>=24)narrative='High risk. '+tmLabel+' GA rate is well above the D1 average. Defensive zone faceoff wins and shot suppression are crucial.';
+else if(rate>=22)narrative='Elevated risk. Situational pressure factors are amplifying '+tmLabel.toLowerCase()+' conversion rate above baseline.';
+else if(rate>=D.baseline)narrative='Near the D1 baseline. '+(tmData?esc(tmData[0])+' faces':'A')+' typical penalty kill risk with no unusual amplifiers.';
+else if(rate>=18)narrative='Below-average risk. '+(tmData?esc(tmData[0])+'\'s PK succeeds':'Penalty kills succeed')+' more often than the D1 mean in this situation.';
+else narrative='Low risk. Defensive conditions strongly favor '+(tmData?esc(tmData[0]):'the killing team')+' in this scenario.';
+
+var gaugeLabel=tmData?esc(tmData[0])+' Adj. Estimate':'D1 Average';
+var refLine='';
+if(tmData){
+var d1W=Math.min(d1Rate/40*100,100).toFixed(1);
+refLine='<div style="position:absolute;left:'+d1W+'%;top:-6px;bottom:-6px;width:0;border-left:2.5px solid var(--accent);opacity:.5;z-index:3" title="D1 avg: '+d1Rate.toFixed(1)+'%"></div>'+
+'<div style="position:absolute;left:'+d1W+'%;top:-18px;font-size:8px;font-weight:700;color:var(--accent);white-space:nowrap;transform:translateX(-50%)">D1 '+d1Rate.toFixed(1)+'%</div>';
+}
+
+box.innerHTML=
+'<div style="display:flex;align-items:center;gap:16px;margin-bottom:20px">'+
+'<div style="width:80px;height:80px;border-radius:50%;background:'+riskBg+';display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;border:2.5px solid '+riskCol+'">'+
+'<div style="font-size:24px;font-weight:700;color:'+riskCol+';line-height:1">'+rate.toFixed(1)+'</div>'+
+'<div style="font-size:8px;font-weight:700;color:'+riskCol+';opacity:.7">% GA</div></div>'+
+'<div style="flex:1"><div style="font-size:11px;font-weight:700;color:'+riskCol+';letter-spacing:.1em;margin-bottom:2px">'+riskLvl+' RISK'+(tmData?' — '+esc(tmData[0]):'')+'</div>'+
+'<div style="font-size:22px;font-weight:700;color:var(--text)">'+diffSign+diff.toFixed(1)+'% <span style="font-size:12px;font-weight:500;color:var(--ts)">vs '+D.baseline+'% baseline</span></div>'+
+'<div style="font-size:11px;color:var(--tm);margin-top:2px">'+gaugeLabel+' — '+situation+'</div></div></div>'+
+'<div style="position:relative;height:22px;background:var(--sr);border-radius:11px;overflow:visible;margin-bottom:28px;margin-top:4px">'+
+'<div style="position:absolute;left:'+blW+'%;top:-4px;bottom:-4px;width:0;border-left:2px dashed var(--bl);opacity:.4;z-index:2"></div>'+
+refLine+
+'<div id="sim-gauge" style="height:100%;width:0;background:linear-gradient(90deg,'+riskCol+','+riskCol+'88);border-radius:11px;transition:width .6s cubic-bezier(.22,1,.36,1)"></div></div>'+
+'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px">'+
+'<div style="background:var(--sr);padding:14px;border-radius:10px;text-align:center"><div style="font-size:9px;font-weight:700;color:var(--tm);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">D1 Sample</div><div style="font-family:var(--fd);font-size:24px;color:var(--text)">'+n.toLocaleString()+'</div></div>'+
+'<div style="background:var(--sr);padding:14px;border-radius:10px;text-align:center"><div style="font-size:9px;font-weight:700;color:var(--tm);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">'+(tmData?'Team GA':'D1 GA')+'</div><div style="font-family:var(--fd);font-size:24px;color:var(--text)">'+(tmData?tmGa+'%':ga.toLocaleString())+'</div></div>'+
+'<div style="background:var(--sr);padding:14px;border-radius:10px;text-align:center"><div style="font-size:9px;font-weight:700;color:var(--tm);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">'+(tmData?'Team Kill':'D1 Kill')+'</div><div style="font-family:var(--fd);font-size:24px;color:'+riskCol+'">'+(tmData?(100-rate).toFixed(1):(100-d1Rate).toFixed(1))+'%</div></div></div>'+
+'<div style="background:var(--sr);padding:14px 16px;border-radius:10px;border-left:3px solid '+riskCol+'">'+
+'<div style="font-size:12px;color:var(--ts);line-height:1.6">'+narrative+(tmData?' <span style="color:var(--tm)">(D1-wide situational rate: '+d1Rate.toFixed(1)+'%, adjusted by '+esc(tmData[0])+'\'s overall PK of '+tmGa+'% vs '+D.baseline+'% baseline)</span>':'')+'</div></div>'+
+(n<50?'<div style="margin-top:10px;font-size:10px;color:var(--warm);opacity:.8">Small sample (n='+n+'). Interpret with caution.</div>':'');
+
+if(tmData){
+var tmName=tmData[0];
+var tmConf=CONF[tmName]||'Independent';
+var tmPpg=tmData[3];
+var ppD=PP_DATA[tmName];
+var trendD=TREND_DATA[tmName];
+var h2hD=H2H_DATA[tmName];
+
+var ppHtml='';
+if(ppD){
+var ppRate=ppD[2];
+var pkVsPp='<div style="display:flex;gap:12px;align-items:stretch;margin-top:10px">';
+pkVsPp+='<div style="flex:1;background:var(--bg);border-radius:8px;padding:12px;text-align:center"><div style="font-size:9px;font-weight:700;color:var(--tm);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Penalty Kill (GA%)</div>';
+pkVsPp+='<div style="font-family:var(--fd);font-size:28px;color:'+barCol(tmGa,D.baseline)+'">'+tmGa+'%</div>';
+pkVsPp+='<div style="font-size:10px;color:var(--ts);margin-top:2px">Kill rate: '+(100-tmGa).toFixed(1)+'%</div>';
+var pkBarW=Math.min(tmGa/40*100,100).toFixed(1);
+pkVsPp+='<div style="margin-top:8px;height:8px;background:var(--sr);border-radius:4px;overflow:hidden"><div style="height:100%;width:'+pkBarW+'%;background:'+barCol(tmGa,D.baseline)+';border-radius:4px"></div></div></div>';
+pkVsPp+='<div style="flex:1;background:var(--bg);border-radius:8px;padding:12px;text-align:center"><div style="font-size:9px;font-weight:700;color:var(--tm);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Power Play (Conv%)</div>';
+pkVsPp+='<div style="font-family:var(--fd);font-size:28px;color:'+barCol(ppRate,20)+'">'+ppRate+'%</div>';
+pkVsPp+='<div style="font-size:10px;color:var(--ts);margin-top:2px">'+ppD[1]+' goals on '+ppD[0]+' opp</div>';
+var ppBarW=Math.min(ppRate/40*100,100).toFixed(1);
+pkVsPp+='<div style="margin-top:8px;height:8px;background:var(--sr);border-radius:4px;overflow:hidden"><div style="height:100%;width:'+ppBarW+'%;background:'+barCol(ppRate,20)+';border-radius:4px"></div></div></div></div>';
+ppHtml='<div style="margin-top:16px;background:var(--sr);padding:16px;border-radius:10px;border-left:3px solid var(--ice)">'+
+'<div style="font-size:11px;font-weight:700;color:var(--ice);letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px">PK vs PP Special Teams Profile</div>'+
+'<div style="font-size:10px;color:var(--tm);margin-bottom:8px">'+esc(tmName)+' ('+tmConf+') — '+tmPpg+' penalties/game</div>'+
+pkVsPp+'</div>';
+}
+
+var trendHtml='';
+if(trendD&&trendD.length>=2){
+var vals=trendD.map(function(s){return s[3];});
+var mn=Math.min.apply(null,vals);
+var mx=Math.max.apply(null,vals);
+var range=Math.max(mx-mn,1);
+var svgW=280,svgH=90,pad=20;
+var pw=(svgW-pad*2)/(trendD.length-1);
+var pts=trendD.map(function(s,i){
+var x=pad+i*pw;
+var y=svgH-pad-(s[3]-mn)/(range)*(svgH-pad*2);
+return x.toFixed(1)+','+y.toFixed(1);
+});
+var blY=svgH-pad-(D.baseline-mn)/(range)*(svgH-pad*2);
+var polyline=pts.join(' ');
+var dots=trendD.map(function(s,i){
+var x=pad+i*pw;
+var y=svgH-pad-(s[3]-mn)/(range)*(svgH-pad*2);
+return'<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="3.5" fill="'+barCol(s[3],D.baseline)+'" stroke="var(--surface)" stroke-width="1.5"/>'+
+'<text x="'+x.toFixed(1)+'" y="'+(y-8).toFixed(1)+'" text-anchor="middle" font-size="8" font-weight="600" fill="var(--ts)">'+s[3]+'%</text>';
+}).join('');
+var labels=trendD.map(function(s,i){
+var x=pad+i*pw;
+return'<text x="'+x.toFixed(1)+'" y="'+(svgH-3)+'" text-anchor="middle" font-size="7" fill="var(--tm)">'+s[0].replace('20','\'')+'</text>';
+}).join('');
+trendHtml='<div style="margin-top:16px;background:var(--sr);padding:16px;border-radius:10px;border-left:3px solid var(--accent)">'+
+'<div style="font-size:11px;font-weight:700;color:var(--accent);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px">Season-by-Season PK Trend</div>'+
+'<div style="display:flex;justify-content:center"><svg viewBox="0 0 '+svgW+' '+svgH+'" width="100%" style="max-width:420px" xmlns="http://www.w3.org/2000/svg">'+
+'<line x1="'+pad+'" y1="'+blY.toFixed(1)+'" x2="'+(svgW-pad)+'" y2="'+blY.toFixed(1)+'" stroke="var(--bl)" stroke-width="1" stroke-dasharray="4 3" opacity=".3"/>'+
+'<text x="'+(svgW-pad+4)+'" y="'+(blY+3).toFixed(1)+'" font-size="7" fill="var(--bl)" opacity=".4">'+D.baseline+'%</text>'+
+'<polyline points="'+polyline+'" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round"/>'+
+dots+labels+'</svg></div>'+
+'<div style="font-size:10px;color:var(--tm);text-align:center;margin-top:4px">GA% per season (dashed line = D1 baseline '+D.baseline+'%)</div></div>';
+}
+
+var matchHtml='';
+if(h2hD){
+var opps=Object.keys(h2hD).map(function(o){return{name:o,n:h2hD[o][0],ga:h2hD[o][1],rate:h2hD[o][2]};});
+opps.sort(function(a,b){return b.n-a.n;});
+var top=opps.slice(0,8);
+if(top.length){
+var mRows=top.map(function(o){
+var w=Math.min(o.rate/40*100,100).toFixed(1);
+return'<div class="br"><div class="br-l">'+esc(o.name)+'</div>'+
+'<div class="br-t"><div class="br-f" style="width:'+w+'%;background:'+barCol(o.rate,D.baseline)+'"></div>'+
+'<div class="bl" style="left:'+(D.baseline/40*100).toFixed(1)+'%"></div></div>'+
+'<div class="br-v">'+o.rate+'% <span style="font-size:9px;color:var(--tm)">('+o.n+')</span></div></div>';
+}).join('');
+matchHtml='<div style="margin-top:16px;background:var(--sr);padding:16px;border-radius:10px;border-left:3px solid var(--warm)">'+
+'<div style="font-size:11px;font-weight:700;color:var(--warm);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px">Opponent Matchup PK Rates</div>'+
+'<div style="font-size:10px;color:var(--tm);margin-bottom:10px">'+esc(tmName)+'\'s GA% when penalized against each opponent (top by sample size)</div>'+
+'<div class="bc">'+mRows+'</div></div>';
+}
+}
+box.innerHTML+=ppHtml+trendHtml+matchHtml;
+}
+
+setTimeout(function(){var g=document.getElementById('sim-gauge');if(g)g.style.width=gaugeW+'%';},30);
+};
+
+var builders=[pane0,pane1,paneCascade,pane2,paneConf,pane3,pane4,paneSim,pane5,pane6,pane7,pane8,pane9];
+var panes=document.getElementById('panes');
+panes.innerHTML=builders.map(function(_,i){return'<div class="pn'+(i===0?' on':'')+'" id="p'+i+'"></div>';}).join('');
+document.getElementById('p0').innerHTML=pane0();
+
+document.getElementById('tabs').addEventListener('click',function(e){
+  var btn=e.target.closest('.tab');
+  if(!btn)return;
+  var idx=+btn.getAttribute('data-t');
+  document.querySelectorAll('.tab').forEach(function(b){b.classList.remove('on');});
+  document.querySelectorAll('.pn').forEach(function(p){p.classList.remove('on');});
+  btn.classList.add('on');
+  var pane=document.getElementById('p'+idx);
+  if(!pane.innerHTML)pane.innerHTML=builders[idx]();
+  pane.classList.add('on');
+  if(idx===6)setTimeout(calcRisk,50);
+  if(idx===7)setTimeout(runSim,50);
+  if(idx===9)initUpload();
+  if(idx===10)initAI();
+});
+
+window.askQuick=function(q){var ci=document.getElementById('chat-in');if(ci){ci.value=q;sendChat();}};
+
+window.saveGeminiKey=function(){
+  var k=document.getElementById('gemini-key').value.trim();
+  if(!k){document.getElementById('key-status').textContent='Please paste a valid key.';return;}
+  try{localStorage.setItem('gemini_key',k);}catch(e){}
+  geminiKey=k;
+  document.getElementById('key-status').textContent='Connected. You can now ask questions above.';
+  document.getElementById('key-status').style.color='var(--cool)';
+  var st=document.getElementById('ai-status');if(st)st.textContent='AI connected via Gemini 2.0 Flash. Ask anything.';
+};
+
+function initUpload(){
+  var dz=document.getElementById('drop-zone');
+  var fi=document.getElementById('csv-file');
+  if(!dz||dz._init)return;
+  dz._init=true;
+  dz.onclick=function(){fi.click();};
+  fi.onchange=function(e){if(e.target.files[0])parseCSV(e.target.files[0]);};
+  dz.ondragover=function(e){e.preventDefault();dz.style.borderColor='var(--accent)';};
+  dz.ondragleave=function(){dz.style.borderColor='var(--border)';};
+  dz.ondrop=function(e){e.preventDefault();dz.style.borderColor='var(--border)';if(e.dataTransfer.files[0])parseCSV(e.dataTransfer.files[0]);};
+}
+
+function parseCSV(file){
+  var reader=new FileReader();
+  reader.onload=function(e){
+    var lines=e.target.result.split('\n').filter(function(l){return l.trim();});
+    if(lines.length<2){showUpErr('CSV appears empty.');return;}
+    var headers=lines[0].split(',').map(function(h){return h.trim().toLowerCase();});
+    var oi=headers.indexOf('offense'),gi=headers.indexOf('goal_against');
+    if(oi===-1||gi===-1){showUpErr('Required columns: offense, goal_against (0/1)');return;}
+    var pi=headers.indexOf('period'),di=headers.indexOf('duration'),si=headers.indexOf('score_diff');
+    var rows=[];
+    for(var i=1;i<lines.length;i++){
+      var c=lines[i].split(',').map(function(v){return v.trim();});
+      if(c.length<=Math.max(oi,gi))continue;
+      var row={offense:c[oi],ga:c[gi]};
+      if(pi>=0&&c[pi])row.period=c[pi];
+      if(di>=0&&c[di])row.duration=c[di];
+      if(si>=0&&c[si])row.score_diff=c[si];
+      rows.push(row);
+    }
+    analyzeUpload(rows,{hasPeriod:pi>=0,hasDuration:di>=0,hasScore:si>=0});
+  };
+  reader.readAsText(file);
+}
+
+function analyzeUpload(rows,cols){
+  var valid=rows.filter(function(r){return r.ga==='0'||r.ga==='1';});
+  var gaR=valid.filter(function(r){return r.ga==='1';});
+  var bl=valid.length?(gaR.length/valid.length*100).toFixed(1):0;
+  var offAgg={};
+  valid.forEach(function(r){var o=r.offense||'Unknown';if(!offAgg[o])offAgg[o]={n:0,g:0};offAgg[o].n++;if(r.ga==='1')offAgg[o].g++;});
+  var od=Object.keys(offAgg).filter(function(k){return offAgg[k].n>=3;}).map(function(k){var v=offAgg[k];return[k,v.g,v.n,+(v.g/v.n*100).toFixed(1)];}).sort(function(a,b){return b[3]-a[3];});
+  var html='<div class="cd" style="margin-top:20px"><h2>Your Program\'s Analysis</h2>'+
+    '<div class="sts" style="margin-bottom:20px;grid-template-columns:repeat(4,1fr)">'+
+    '<div class="st"><div class="st-n">'+fmt(rows.length)+'</div><div class="st-l">Rows</div></div>'+
+    '<div class="st"><div class="st-n">'+fmt(valid.length)+'</div><div class="st-l">Valid</div></div>'+
+    '<div class="st"><div class="st-n">'+bl+'%</div><div class="st-l">Your GA Rate</div></div>'+
+    '<div class="st"><div class="st-n">'+D.baseline+'%</div><div class="st-l">D1 Baseline</div></div></div>';
+  var offBars=od.slice(0,12).map(function(o){return[o[0],o[3],'\n'+o[3]+'% ('+o[1]+'/'+o[2]+')'];});
+  if(offBars.length){
+    var offMax=Math.max.apply(null,offBars.map(function(o){return o[1];}))+5;
+    html+='<h3 style="font-family:var(--fd);font-size:17px;margin:20px 0 10px">Offense Breakdown</h3>'+hBar(offBars,offMax,+bl);
+  }
+  if(cols.hasDuration){
+    var durAgg={};
+    valid.forEach(function(r){var d=r.duration||'Unknown';var lb=d;if(d==='02:00'||d==='2')lb='2 min';else if(d==='05:00'||d==='5')lb='5 min';else if(d==='10:00'||d==='10')lb='10 min';if(!durAgg[lb])durAgg[lb]={n:0,g:0};durAgg[lb].n++;if(r.ga==='1')durAgg[lb].g++;});
+    var dd=Object.keys(durAgg).filter(function(k){return durAgg[k].n>=3;}).map(function(k){var v=durAgg[k];return[k,+(v.g/v.n*100).toFixed(1),'\n'+(v.g/v.n*100).toFixed(1)+'% ('+v.g+'/'+v.n+')'];}).sort(function(a,b){return b[1]-a[1];});
+    if(dd.length){html+='<h3 style="font-family:var(--fd);font-size:17px;margin:24px 0 10px">By Severity</h3>'+hBar(dd,Math.max.apply(null,dd.map(function(d){return d[1];}))+5,+bl);}
+  }
+  if(cols.hasPeriod){
+    var perAgg={};
+    valid.forEach(function(r){var p=r.period||'?';if(!perAgg[p])perAgg[p]={n:0,g:0};perAgg[p].n++;if(r.ga==='1')perAgg[p].g++;});
+    var pd=Object.keys(perAgg).filter(function(k){return perAgg[k].n>=3;}).map(function(k){var v=perAgg[k];return[k,+(v.g/v.n*100).toFixed(1),'\n'+(v.g/v.n*100).toFixed(1)+'% ('+v.g+'/'+v.n+')'];}).sort(function(a,b){return b[1]-a[1];});
+    if(pd.length){html+='<h3 style="font-family:var(--fd);font-size:17px;margin:24px 0 10px">By Period</h3>'+hBar(pd,Math.max.apply(null,pd.map(function(d){return d[1];}))+5,+bl);}
+  }
+  if(cols.hasScore){
+    var sdAgg={};
+    valid.forEach(function(r){var sd=parseInt(r.score_diff,10);var lb;if(isNaN(sd))lb='?';else if(sd<=-2)lb='Down 2+';else if(sd===-1)lb='Down 1';else if(sd===0)lb='Tied';else if(sd===1)lb='Up 1';else lb='Up 2+';if(!sdAgg[lb])sdAgg[lb]={n:0,g:0};sdAgg[lb].n++;if(r.ga==='1')sdAgg[lb].g++;});
+    var so=['Down 2+','Down 1','Tied','Up 1','Up 2+'];
+    var sd2=so.filter(function(k){return sdAgg[k]&&sdAgg[k].n>=3;}).map(function(k){var v=sdAgg[k];return[k,+(v.g/v.n*100).toFixed(1),'\n'+(v.g/v.n*100).toFixed(1)+'% ('+v.g+'/'+v.n+')'];});
+    if(sd2.length){html+='<h3 style="font-family:var(--fd);font-size:17px;margin:24px 0 10px">By Score State</h3>'+hBar(sd2,Math.max.apply(null,sd2.map(function(d){return d[1];}))+5,+bl);}
+  }
+  html+='</div>';
+  document.getElementById('upload-results').innerHTML=html;
+}
+
+function showUpErr(msg){document.getElementById('upload-results').innerHTML='<div class="cd" style="border-color:var(--hot);margin-top:20px"><p style="color:var(--hot)">'+msg+'</p></div>';}
+
+var sampleApi=null,geminiKey=null;
+try{geminiKey=localStorage.getItem('gemini_key');}catch(e){}
+
+function initAI(){
+  var ci=document.getElementById('chat-in'),cs=document.getElementById('chat-send');
+  if(!ci||ci._init)return;
+  ci._init=true;
+  ci.onkeydown=function(e){if(e.key==='Enter')sendChat();};
+  cs.onclick=sendChat;
+  if(geminiKey){
+    var st=document.getElementById('ai-status');if(st)st.textContent='AI connected via Gemini 2.0 Flash.';
+    var ki=document.getElementById('gemini-key');if(ki)ki.value='••••••••';
+  }
+  if(window.claude&&window.claude.use){
+    claude.use('sample').then(function(api){
+      sampleApi=api;
+      if(api){var st=document.getElementById('ai-status');if(st)st.textContent='AI connected.';}
+    }).catch(function(){});
+  }
+}
+
+function buildCtx(q){
+  var ctx='NCAA D1 Ice Hockey PK data: '+D.total_penalties+' penalties, '+D.total_games+' games, '+D.total_teams+' programs, baseline GA rate '+D.baseline+'%.\n';
+  ctx+='Top risk offenses (n>=50): '+D.off.filter(function(o){return o[2]>=50;}).slice(0,10).map(function(o){return o[0]+' '+o[3]+'% (n='+o[2]+')';}).join(', ')+'.\n';
+  ctx+='Duration: '+D.dur.map(function(d){return d[0]+' '+d[3]+'%';}).join(', ')+'.\n';
+  ctx+='Score state: '+D.sd.map(function(s){return s[0]+' '+s[3]+'%';}).join(', ')+'.\n';
+  ctx+='Period timing: '+D.pt.map(function(p){return p[0]+' '+p[3]+'%';}).join(', ')+'.\n';
+  ctx+='Period x Score heatmap: '+D.hm.map(function(h){return h[0]+'/'+h[1]+' '+h[2]+'% (n='+h[3]+')';}).join(', ')+'.\n';
+
+  var ql=q?q.toLowerCase():'';
+  var mentioned=D.tm_all.filter(function(t){return ql.indexOf(t[0].toLowerCase())>=0;});
+  if(mentioned.length){
+    ctx+='\nTeams mentioned in question:\n';
+    mentioned.forEach(function(t){
+      var conf=CONF[t[0]]||'Independent';
+      ctx+=t[0]+' ('+conf+'): '+t[1]+' penalties, '+t[2]+' games, '+t[3]+'/g, '+t[4]+'% GA rate.\n';
+    });
+  }
+
+  if(ql.indexOf('conference')>=0||ql.indexOf('conf')>=0){
+    var confStats={};
+    D.tm_all.forEach(function(t){
+      var c=CONF[t[0]]||'Independent';
+      if(!confStats[c])confStats[c]={teams:0,ppgSum:0,gaSum:0};
+      confStats[c].teams++;confStats[c].ppgSum+=t[3];confStats[c].gaSum+=(t[4]||0);
+    });
+    ctx+='\nConference averages:\n';
+    Object.keys(confStats).sort().forEach(function(c){
+      var s=confStats[c];
+      ctx+=c+': '+s.teams+' teams, avg '+(s.ppgSum/s.teams).toFixed(1)+'/g, avg '+(s.gaSum/s.teams).toFixed(1)+'% GA.\n';
+    });
+  }
+
+  ctx+='\nMost disciplined (lowest ppg): '+D.tm_all.slice(-5).reverse().map(function(t){return t[0]+' '+t[3]+'/g ('+t[4]+'%)';}).join(', ')+'.\n';
+  ctx+='Least disciplined (highest ppg): '+D.tm_all.slice(0,5).map(function(t){return t[0]+' '+t[3]+'/g ('+t[4]+'%)';}).join(', ')+'.';
+  return ctx;
+}
+
+function sendChat(){
+  var input=document.getElementById('chat-in');
+  var q=input.value.trim();if(!q)return;input.value='';
+  var box=document.getElementById('chat-box');
+  var ud=document.createElement('div');ud.className='chat-msg user';ud.textContent=q;box.appendChild(ud);box.scrollTop=box.scrollHeight;
+  var prompt='You are a penalty-kill analytics expert for NCAA D1 ice hockey, advising coaches. Use this data:\n'+buildCtx(q)+'\n\nRules: Be concise, actionable, data-driven. Use specific numbers. Frame advice for coaches and players. Compare to the baseline ('+D.baseline+'%). When asked about a team, include their conference context. Do not speculate beyond the data. Do not use markdown formatting like ** or # or _ — respond in plain text only.\n\nQuestion: '+q;
+
+  function cleanMd(s){return s.replace(/\*\*([^*]+)\*\*/g,'$1').replace(/\*([^*]+)\*/g,'$1').replace(/__([^_]+)__/g,'$1').replace(/_([^_]+)_/g,'$1').replace(/^#+\s*/gm,'').replace(/^[-*]\s/gm,'  - ');}
+
+  if(sampleApi){
+    var td=document.createElement('div');td.className='chat-msg ai';td.textContent='Analyzing...';box.appendChild(td);box.scrollTop=box.scrollHeight;
+    sampleApi(prompt,{onText:function(t){td.textContent=cleanMd(t.text);box.scrollTop=box.scrollHeight;}}).then(function(r){td.textContent=cleanMd(r.text);box.scrollTop=box.scrollHeight;}).catch(function(e){td.textContent='Error: '+(e.message||'Could not get response.');box.scrollTop=box.scrollHeight;});
+    return;
+  }
+
+  if(geminiKey){
+    var td2=document.createElement('div');td2.className='chat-msg ai';td2.textContent='Analyzing...';box.appendChild(td2);box.scrollTop=box.scrollHeight;
+    var body={contents:[{parts:[{text:prompt}]}]};
+    fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key='+geminiKey,{
+      method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)
+    }).then(function(r){return r.json();}).then(function(j){
+      if(j.candidates&&j.candidates[0]&&j.candidates[0].content)td2.textContent=cleanMd(j.candidates[0].content.parts[0].text);
+      else if(j.error)td2.textContent='API error: '+j.error.message;
+      else td2.textContent='Unexpected response. Check your API key.';
+      box.scrollTop=box.scrollHeight;
+    }).catch(function(e){td2.textContent='Network error: '+e.message;box.scrollTop=box.scrollHeight;});
+    return;
+  }
+
+  var matched=matchInsight(q);
+  var nd=document.createElement('div');nd.className='chat-msg ai';
+  nd.textContent=matched||'Connect a Gemini API key below for live AI answers, or browse the coaching insights for pre-computed analysis.';
+  box.appendChild(nd);box.scrollTop=box.scrollHeight;
+}
+
+function matchInsight(q){
+  q=q.toLowerCase();
+  if(q.indexOf('trail')>=0||q.indexOf('behind')>=0||q.indexOf('down')>=0)return INSIGHTS[0].t+': '+INSIGHTS[0].b;
+  if(q.indexOf('major')>=0||q.indexOf('minor')>=0||q.indexOf('sever')>=0)return INSIGHTS[1].t+': '+INSIGHTS[1].b;
+  if(q.indexOf('2nd')>=0||q.indexOf('second')>=0)return INSIGHTS[5].t+': '+INSIGHTS[5].b;
+  if(q.indexOf('contact')>=0||q.indexOf('head')>=0)return INSIGHTS[3].t+': '+INSIGHTS[3].b;
+  if(q.indexOf('lead')>=0||q.indexOf('ahead')>=0||q.indexOf('winning')>=0)return INSIGHTS[4].t+': '+INSIGHTS[4].b;
+  if(q.indexOf('cost')>=0||q.indexOf('season')>=0||q.indexOf('worth')>=0){
+    var avgPpg=D.ppg_avg;
+    return'At the D1 average of '+avgPpg+' penalties/game over a 34-game season, that is ~'+Math.round(avgPpg*34)+' penalties. At '+D.baseline+'% baseline GA rate, each penalty costs ~'+((D.baseline/100)).toFixed(2)+' goals. One additional penalty per game adds ~'+(34*(D.baseline/100)).toFixed(0)+' goals against per season.';
+  }
+  if(q.indexOf('conference')>=0||q.indexOf('conf')>=0){
+    var confStats={};
+    D.tm_all.forEach(function(t){var c=CONF[t[0]]||'Independent';if(!confStats[c])confStats[c]={teams:0,ppg:0,ga:0};confStats[c].teams++;confStats[c].ppg+=t[3];confStats[c].ga+=(t[4]||0);});
+    var lines=Object.keys(confStats).sort().map(function(c){var s=confStats[c];return c+': '+(s.ppg/s.teams).toFixed(1)+'/g, '+(s.ga/s.teams).toFixed(1)+'% GA ('+s.teams+' teams)';});
+    return'Conference averages:\n'+lines.join('\n');
+  }
+  var teamMatch=D.tm_all.find(function(t){return q.indexOf(t[0].toLowerCase())>=0;});
+  if(teamMatch){
+    var conf=CONF[teamMatch[0]]||'Independent';
+    return teamMatch[0]+' ('+conf+'): '+teamMatch[3]+' penalties/game (rank #'+(D.tm_all.filter(function(t){return t[3]>teamMatch[3];}).length+1)+'), '+teamMatch[4]+'% GA rate (rank #'+(D.tm_all.filter(function(t){return(t[4]||0)>teamMatch[4];}).length+1)+'), '+teamMatch[1]+' total penalties across '+teamMatch[2]+' games. Baseline: '+D.baseline+'% GA rate.';
+  }
+  if(q.indexOf('best')>=0||q.indexOf('disciplin')>=0){
+    var best=D.tm_all.slice(-5).reverse();
+    return'Most disciplined programs (lowest penalties/game): '+best.map(function(t){return t[0]+' ('+( CONF[t[0]]||'Ind')+') at '+t[3]+'/game ('+t[4]+'% GA rate)';}).join(', ')+'.';
+  }
+  return null;
+}
+
+requestAnimationFrame(function(){
+  document.querySelectorAll('.br-f,.vb-f').forEach(function(el){
+    var w=el.style.width||el.style.height;
+    if(el.style.width){el.style.width='0';requestAnimationFrame(function(){el.style.width=w;});}
+    if(el.style.height){el.style.height='0';requestAnimationFrame(function(){el.style.height=w;});}
+  });
+});
+})();
+</script>
+
+</body></html>
